@@ -1,0 +1,16 @@
+server:
+  port: 8011
+
+spring:
+  application:
+    name: mydream
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: zxcvbnm,.
+    username: root
+    url: jdbc:mysql://localhost:3306/mydream?useSSL=false&serverTimezone=Asia/Shanghai
+
+robot:
+  ding:
+    - 高级花克专家,aaa,bbb,true
+    - little baby,aaa,bbb,true
