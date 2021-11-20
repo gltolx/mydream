@@ -1,4 +1,4 @@
-package com.lin.mydream.service;
+package com.lin.mydream.component;
 
 import com.lin.mydream.manager.RobotManager;
 import com.lin.mydream.model.Robot;
@@ -41,6 +41,10 @@ public class ReceivedRobotHolder implements InitializingBean {
      */
     public static Robotx pick(String outgoingToken) {
         return pussyPicker.get(outgoingToken);
+    }
+
+    public static Long id(String outgoingToken) {
+        return pick(outgoingToken).self().getId();
     }
 
     public static void put(Robot robot) {

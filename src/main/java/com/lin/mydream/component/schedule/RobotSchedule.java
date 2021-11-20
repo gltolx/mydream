@@ -1,8 +1,7 @@
-package com.lin.mydream.service.schedule;
+package com.lin.mydream.component.schedule;
 
 import com.lin.mydream.manager.RobotManager;
 import com.lin.mydream.model.Robotx;
-import com.lin.mydream.service.RobotService;
 import com.lin.mydream.service.dto.TextDingDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;

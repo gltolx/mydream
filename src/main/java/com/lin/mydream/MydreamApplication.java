@@ -1,6 +1,6 @@
 package com.lin.mydream;
 
-import com.lin.mydream.service.ReceivedRobotHolder;
+import com.lin.mydream.component.ReceivedRobotHolder;
 import com.lin.mydream.model.Robotx;
 import com.lin.mydream.service.dto.TextDingDTO;
 import org.mybatis.spring.annotation.MapperScan;

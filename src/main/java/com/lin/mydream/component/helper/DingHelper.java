@@ -1,4 +1,4 @@
-package com.lin.mydream.service.helper;
+package com.lin.mydream.component.helper;
 
 import com.lin.mydream.config.RobotProperties;
 import lombok.extern.slf4j.Slf4j;

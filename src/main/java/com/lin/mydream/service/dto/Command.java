@@ -1,6 +1,10 @@
 package com.lin.mydream.service.dto;
 
+import com.google.common.base.Splitter;
+import com.lin.mydream.util.CommonUtil;
 import lombok.*;
+
+import java.util.List;
 
 /**
  * Created on Milky Way Galaxy.
@@ -25,4 +29,24 @@ public class Command {
      * 命令体， - 后的内容
      */
     private String body;
+
+    public String ogt() {
+        return getOgt();
+    }
+
+    public String head() {
+        return getHead();
+    }
+
+    public String body() {
+        return getBody();
+    }
+
+    public List<String> extractKeysFromBody() {
+        return CommonUtil.orEmpty(() -> Splitter
+                .on(body.contains("'") ? "'" : "\"")
+                .omitEmptyStrings()
+                .trimResults()
+                .splitToList(body));
+    }
 }

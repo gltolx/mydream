@@ -73,4 +73,5 @@ public class CommonUtil {
             return Pair.of(trimLeading(input), StringUtils.EMPTY);
         }
     }
+
 }

@@ -30,6 +30,32 @@ public class RobotEnum {
         private final String name;
     }
 
+    /**
+     * 记忆类型
+     */
+    @AllArgsConstructor
+    @Getter
+    public enum RememberType implements BaseEnum<Integer> {
+        remember(0, "记忆"),
+        notify(1, "提醒"),
+        ;
+
+        private final Integer code;
+        private final String name;
+
+        public static RememberType judge(String head) {
+            if (head.toLowerCase().contains(RememberType.remember.name())
+                    || head.contains(RememberType.remember.getName())) {
+                return RememberType.remember;
+            } else if (head.toLowerCase().contains(RememberType.notify.name())
+                    || head.contains(RememberType.notify.getName())) {
+                return RememberType.notify;
+            } else {
+                return RememberType.remember;
+            }
+        }
+    }
+
 
     public static <C, T extends BaseEnum<C>> T of(C code, Class<T> enumClz) {
         Objects.requireNonNull(code);

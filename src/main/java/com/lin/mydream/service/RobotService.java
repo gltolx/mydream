@@ -1,5 +1,6 @@
 package com.lin.mydream.service;
 
+import com.lin.mydream.component.ReceivedRobotHolder;
 import com.lin.mydream.consts.MydreamException;
 import com.lin.mydream.controller.param.CreateRobotParam;
 import com.lin.mydream.manager.RobotManager;
@@ -32,6 +33,7 @@ public class RobotService {
     }
 
     /**
+     * acquire token;
      * 喊话机器人预创建
      *
      * @return 回传一个outgoing token
@@ -43,6 +45,7 @@ public class RobotService {
     }
 
     /**
+     * create robot - [ACCESS_TOKEN],[SIGN],[OUTGOING_TOKEN];
      * 根据之前回传的token识别并创建机器人
      *
      * @return 机器人id
@@ -59,10 +62,16 @@ public class RobotService {
         return robotId;
     }
 
+    /**
+     * delete robot - [ACCESS_TOKEN],[OUTGOING_TOKEN];
+     */
     public boolean deleteByOutgoingToken(String outgoingToken) {
         return robotManager.deleteByOutgoingToken(outgoingToken);
     }
 
+    /**
+     * delete robot - [ACCESS_TOKEN],[OUTGOING_TOKEN];
+     */
     public boolean deleteByAccessToken(String accessToken) {
         return robotManager.deleteByAccessToken(accessToken);
     }
