@@ -22,7 +22,8 @@ public class RobotEnum {
     @Getter
     public enum Stat implements BaseEnum<Integer> {
         valid(1, "正常"),
-        invalid(0, "失效"),
+        initial(0, "初始化"),
+        invalid(-1, "失效"),
         ;
 
         private final Integer code;

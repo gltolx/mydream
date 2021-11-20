@@ -1,8 +1,6 @@
 package com.lin.mydream.model;
 
 import com.lin.mydream.service.dto.BaseDingMsgDTO;
-import com.lin.mydream.service.dto.LinkDingDTO;
-import com.lin.mydream.service.dto.MarkdownDingDTO;
 import com.lin.mydream.service.dto.TextDingDTO;
 import com.lin.mydream.util.SignUtil;
 import com.lin.mydream.util.SpringUtil;
@@ -13,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.function.Consumer;
 
 /**
  * Created on Milky Way Galaxy.
@@ -41,6 +41,17 @@ public class Robotx {
         return getSelf();
     }
 
+    public boolean ifOutgoing() {
+        return self().ifOutgoing();
+    }
+
+    public void ifNotOutgoing(Consumer<Robotx> consumer) {
+        if (!ifOutgoing()) {
+            consumer.accept(this);
+        }
+    }
+
+
     /**
      * 获取机器人webhook地址
      */
@@ -52,26 +63,11 @@ public class Robotx {
                 self.getAccessToken(), timestamp, sign);
     }
 
-    /**
-     * 发送Text
-     */
-    public void sendText(TextDingDTO textDingDTO) {
-        send(textDingDTO);
+
+    public void send(String content) {
+        send(TextDingDTO.normal(content));
     }
 
-    /**
-     * 发送Link
-     */
-    public void sendLink(LinkDingDTO linkDingDTO) {
-        send(linkDingDTO);
-    }
-
-    /**
-     * 发送Markdown
-     */
-    public void sendMarkdown(MarkdownDingDTO markdownDingDTO) {
-        send(markdownDingDTO);
-    }
 
     /**
      * 机器人发送钉钉消息
@@ -82,6 +78,22 @@ public class Robotx {
         RestTemplate restTemplate = SpringUtil.getBean(RestTemplate.class);
         String url = this.makeWebhookUrl();
         try {
+            restTemplate.postForEntity(url, msgDTO, msgDTO.getClass());
+        } catch (RestClientException e) {
+            log.error("RestClient error, url:{}, msgDTO:{}", url, msgDTO);
+        }
+    }
+
+    /**
+     * 机器人发送钉钉消息（两遍）
+     *
+     * @param msgDTO 消息body
+     */
+    public <T extends BaseDingMsgDTO> void sendTwice(T msgDTO) {
+        RestTemplate restTemplate = SpringUtil.getBean(RestTemplate.class);
+        String url = this.makeWebhookUrl();
+        try {
+            restTemplate.postForEntity(url, msgDTO, msgDTO.getClass());
             restTemplate.postForEntity(url, msgDTO, msgDTO.getClass());
         } catch (RestClientException e) {
             log.error("RestClient error, url:{}, msgDTO:{}", url, msgDTO);

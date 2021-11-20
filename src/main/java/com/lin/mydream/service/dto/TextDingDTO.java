@@ -2,6 +2,7 @@ package com.lin.mydream.service.dto;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
+import com.lin.mydream.util.CommonUtil;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,8 +31,17 @@ public class TextDingDTO extends BaseDingMsgDTO {
     public TextDingDTO(String content, Boolean atAll, String mobiles) {
         super.setMsgtype("text");
         this.text = ImmutableMap.of("content", content);
-        List<String> mobileList = Splitter.on(",").omitEmptyStrings().splitToList(mobiles);
+        List<String> mobileList = CommonUtil.orEmpty(
+                () -> Splitter.on(",").omitEmptyStrings().splitToList(mobiles));
         this.at = ImmutableMap.of("isAtAll", BooleanUtils.isTrue(atAll), "atMobiles", mobileList);
+    }
+
+    public static TextDingDTO normal(String content) {
+        return TextDingDTO.builder().atAll(false).content(content).build();
+    }
+
+    public static TextDingDTO atAll(String content) {
+        return TextDingDTO.builder().atAll(true).content(content).build();
     }
 
 }

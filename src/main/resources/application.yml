@@ -12,5 +12,5 @@ spring:
 
 robot:
   ding:
-    - 高级花克专家,aaa,bbb,true
-    - little baby,aaa,bbb,true
+    - aaa,bbb,true
+    - aaa,bbb,true

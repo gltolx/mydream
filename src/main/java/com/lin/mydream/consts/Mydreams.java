@@ -1,4 +1,4 @@
-package com.lin.mydream.constant;
+package com.lin.mydream.consts;
 
 /**
  * Created on Milky Way Galaxy.

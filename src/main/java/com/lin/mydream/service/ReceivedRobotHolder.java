@@ -1,9 +1,8 @@
-package com.lin.mydream.holder;
+package com.lin.mydream.service;
 
-import com.lin.mydream.model.Robotx;
+import com.lin.mydream.manager.RobotManager;
 import com.lin.mydream.model.Robot;
-import com.lin.mydream.model.enumerate.RobotEnum;
-import com.lin.mydream.service.RobotService;
+import com.lin.mydream.model.Robotx;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.annotation.Order;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -29,37 +29,40 @@ public class ReceivedRobotHolder implements InitializingBean {
 
     /**
      * real outgoing token -> "roobot"
-     * 投喂机器人消息的分发器
+     * 投喂机器人消息的分发器（决定选中哪个幸运的小樱桃）
      */
-    private Map<String, Robotx> robotDistributor;
+    private static Map<String, Robotx> pussyPicker = new ConcurrentHashMap<>();
 
     @Resource
-    private RobotService robotService;
+    private RobotManager robotManager;
 
     /**
      * 根据outgoingToken识别机器人
      */
-    public Robotx get(String outgoingToken) {
-        return robotDistributor.get(outgoingToken);
+    public static Robotx pick(String outgoingToken) {
+        return pussyPicker.get(outgoingToken);
+    }
+
+    public static void put(Robot robot) {
+        Objects.requireNonNull(robot);
+
+        put(robot.getOutgoingToken(), new Robotx(robot));
     }
 
     /**
      * 放置一个机器人
      */
-    private void put(String outgoingToken, Robotx robotx) {
-        robotDistributor.put(outgoingToken, robotx);
+    public static void put(String outgoingToken, Robotx robotx) {
+        pussyPicker.put(outgoingToken, robotx);
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        List<Robot> robots = robotService
-                .lambdaQuery()
-                .eq(Robot::getStat, RobotEnum.Stat.valid.code())
-                .eq(Robot::isOutgoingEnable, true)
-                .isNotNull(Robot::getOutgoingToken)
-                .list();
+        List<Robot> robots = robotManager.findValidOutgoingRobots();
+        // TODO 其他关联信息
 
-        robotDistributor = robots.stream()
+        pussyPicker = robots.stream()
+                .filter(Robot::ifOutgoing)
                 .map(Robotx::new)
                 .collect(Collectors.toMap(
                         k -> k.self().getOutgoingToken()

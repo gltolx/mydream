@@ -4,8 +4,11 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.google.common.base.Splitter;
 import com.lin.mydream.model.base.BaseModel;
+import com.lin.mydream.model.enumerate.RobotEnum;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,14 +25,9 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Data
+@Accessors(chain = true)
 @TableName("my_robot")
 public class Robot extends BaseModel {
-    /**
-     * 机器人名字
-     * (由钉钉提供，和钉钉机器人名字保持一致)
-     */
-    @TableField("robot_name")
-    private String name;
     /**
      * AccessToken
      * (由钉钉提供)
@@ -49,7 +47,7 @@ public class Robot extends BaseModel {
     @TableField("outgoing_enable")
     private boolean outgoingEnable;
     /**
-     * outgoing机制的token
+     * outgoing机制的token（MyDream的唯一码）
      * (由MyDream提供和识别, 填写到钉钉机器人中)
      */
     @TableField("outgoing_token")
@@ -61,7 +59,7 @@ public class Robot extends BaseModel {
     private boolean admin;
 
     /**
-     * 机器人状态 1正常 0失效
+     * 机器人状态 1正常 0初始化 -1失效
      * @see com.lin.mydream.model.enumerate.RobotEnum.Stat
      */
     @TableField("robot_stat")
@@ -76,10 +74,11 @@ public class Robot extends BaseModel {
             return null;
         }
         Robot robot = new Robot();
-        robot.setName(list.get(0));
-        robot.setAccessToken(list.get(1));
-        robot.setSign(list.get(2));
-        robot.setOutgoingEnable("true".equals(list.get(3)) || "1".equals(list.get(3)));
+//        robot.setName(list.get(0));
+        robot.setAccessToken(list.get(0));
+        robot.setSign(list.get(1));
+        robot.setOutgoingEnable(true);
+        robot.setOutgoingToken(list.get(3));
         return robot;
     }
 
@@ -92,5 +91,25 @@ public class Robot extends BaseModel {
 
         log.info("==> init robot, input ding:{}, output robots:{}", ding, robots);
         return robots;
+    }
+
+    /**
+     * 是否支持outgoing机制
+     */
+    public boolean ifOutgoing() {
+        return isOutgoingEnable() && StringUtils.isNotEmpty(getOutgoingToken());
+    }
+
+
+    public static Robot preCreate(String token) {
+        Robot entity = new Robot();
+        entity.setSign("0");
+        entity.setAccessToken("0");
+        entity.setOutgoingEnable(true);
+        // 后续创建识别这个outgoingToken追加信息
+        entity.setOutgoingToken(token);
+        entity.setStat(RobotEnum.Stat.initial.getCode());
+//        entity.setName("0");
+        return entity;
     }
 }

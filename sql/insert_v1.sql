@@ -12,6 +12,6 @@
 --     `is_admin` tinyint NOT NULL DEFAULT 0 COMMENT '是否是管理者机器人 1是 0不是',
 --     `robot_stat` tinyint(4) NOT NULL DEFAULT 1 COMMENT '状态 1正常 0失效',
 
-insert into my_robot(`robot_name`, `access_token`, `robot_sign`, `outgoing_enable`, `outgoing_token`, `is_admin`)
-values ('metaverse', 'f0676f432ae1da77af9a6219296982c23741ae23ea6f7638bc4bfebfb8d8771a',
+insert into my_robot(`access_token`, `robot_sign`, `outgoing_enable`, `outgoing_token`, `is_admin`)
+values ('f0676f432ae1da77af9a6219296982c23741ae23ea6f7638bc4bfebfb8d8771a',
         'SECc99725f7915d0314e7c77eed43f51376c47736116ae567374f3fb3f4544a1a6c', true, 'e49f5b', true);
