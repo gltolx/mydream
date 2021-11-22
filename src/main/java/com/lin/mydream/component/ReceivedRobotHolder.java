@@ -9,6 +9,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -58,6 +59,10 @@ public class ReceivedRobotHolder implements InitializingBean {
      */
     public static void put(String outgoingToken, Robotx robotx) {
         pussyPicker.put(outgoingToken, robotx);
+    }
+
+    public static Collection<Robotx> values() {
+        return pussyPicker.values();
     }
 
     @Override

@@ -31,6 +31,14 @@ public class RememberService {
     private RememberManager rememberManager;
 
     /**
+     * wake remembers;
+     * 唤醒记忆
+     */
+    public String wakeRemember(Command command) {
+        return null;
+    }
+
+    /**
      * list remembers;
      * 列出所有记忆
      */
@@ -96,6 +104,12 @@ public class RememberService {
         return rememberManager.save(remember);
     }
 
+    public List<Remember> findByDatesIn(List<Date> dates) {
+
+        return rememberManager.lambdaQuery()
+                .in(x -> x.getRememberTime(), dates)
+                .list();
+    }
 }
 
 
