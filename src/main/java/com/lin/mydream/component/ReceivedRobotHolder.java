@@ -65,6 +65,13 @@ public class ReceivedRobotHolder implements InitializingBean {
         return pussyPicker.values();
     }
 
+    public static Map<Long, Robotx> robotIdMap() {
+        return ReceivedRobotHolder
+                .values()
+                .stream()
+                .collect(Collectors.toMap(k -> k.self().getId(), v -> v, (old, newly) -> newly));
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
         List<Robot> robots = robotManager.findValidOutgoingRobots();

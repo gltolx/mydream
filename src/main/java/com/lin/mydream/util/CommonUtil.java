@@ -5,10 +5,13 @@ import com.lin.mydream.consts.MydreamException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.helpers.MessageFormatter;
 
+import java.text.ParseException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -72,6 +75,29 @@ public class CommonUtil {
         } else {
             return Pair.of(trimLeading(input), StringUtils.EMPTY);
         }
+    }
+
+    public static long getDistanceOfTwoDate(Date before, Date after) {
+        long beforeTime = before.getTime();
+        long afterTime = after.getTime();
+        return (afterTime - beforeTime) / (1000 * 60 * 60 * 24);
+    }
+
+    public static String transferDays(long days) {
+        if (days <= 365L) {
+            return days + "天";
+        } else {
+            if (days % 365 == 0) {
+                return (days / 365) + "周年";
+            } else {
+                return days + "天";
+            }
+        }
+    }
+
+    public static void main(String[] args) throws ParseException {
+        System.out.println(getDistanceOfTwoDate(DateUtils.parseDate("2021-02-14 00:00:00", "yyyy-MM-dd HH:mm:ss"), new Date()));
+        System.out.println(getDistanceOfTwoDate(DateUtils.parseDate("2021-11-01 00:00:00", "yyyy-MM-dd HH:mm:ss"), new Date()));
     }
 
 }

@@ -68,6 +68,13 @@ public class Robotx {
         send(TextDingDTO.normal(content));
     }
 
+    public void sendAt(String content, String mobiles) {
+        send(TextDingDTO.builder()
+                .content(content)
+                .atAll(false)
+                .mobiles(mobiles).build());
+    }
+
 
     /**
      * 机器人发送钉钉消息

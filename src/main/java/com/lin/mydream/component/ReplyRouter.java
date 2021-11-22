@@ -82,6 +82,8 @@ public class ReplyRouter implements InitializingBean {
             rememberService.deleteRemember(command);
             return "delete success.";
         });
+        // 唤醒记忆 | wake up remember
+        ROUTER_MAP.put("wake up remember", command -> rememberService.wakeupRemember(command));
     }
 
     /**

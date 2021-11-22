@@ -1,19 +1,18 @@
 package com.lin.mydream.component.schedule;
 
+import com.lin.mydream.component.ReceivedRobotHolder;
 import com.lin.mydream.manager.RobotManager;
 import com.lin.mydream.model.Remember;
 import com.lin.mydream.model.Robotx;
 import com.lin.mydream.service.RememberService;
 import com.lin.mydream.service.dto.TextDingDTO;
+import com.lin.mydream.util.CommonUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -78,9 +77,17 @@ public class RobotSchedule {
             dates.add(DateUtils.addYears(now, -i));
         }
         List<Remember> remembers = rememberService.findByDatesIn(dates);
-
-        // TODO
-
+        Map<Long, Robotx> robotxMap = ReceivedRobotHolder.robotIdMap();
+        remembers.forEach(x->{
+                    Robotx robotx = robotxMap.get(x.getRobotId());
+                    if (robotx == null) {
+                        return;
+                    }
+                    long days = CommonUtil.getDistanceOfTwoDate(x.getRememberTime(), now);
+                    String diffTime = CommonUtil.transferDays(days);
+                    String text = CommonUtil.format("亲爱的，^_^今天是{}{}的日子。回首山河已是秋，再看山河复长流。去发现，去沉淀，去纪念，去写一封信@未来的自己吧～", x.getName(), diffTime);
+                    robotx.sendAt(text, x.getReceiver());
+                });
     }
 
     /**
