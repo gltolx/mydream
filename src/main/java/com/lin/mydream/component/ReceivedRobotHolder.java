@@ -1,10 +1,12 @@
 package com.lin.mydream.component;
 
+import com.lin.mydream.config.RobotProperties;
 import com.lin.mydream.manager.RobotManager;
 import com.lin.mydream.model.Robot;
 import com.lin.mydream.model.Robotx;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +36,8 @@ public class ReceivedRobotHolder implements InitializingBean {
      */
     private static Map<String, Robotx> pussyPicker = new ConcurrentHashMap<>();
 
+    @Autowired
+    private RobotProperties robotProperties;
     @Resource
     private RobotManager robotManager;
 
@@ -74,7 +78,20 @@ public class ReceivedRobotHolder implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        List<Robot> robots = robotManager.findValidOutgoingRobots();
+        List<Robot> robots = null;
+        try {
+            robots = robotProperties.getDingRobots();
+        } catch (Exception e) {
+            log.error("loading robots failed from spring properties.", e);
+        }
+        try {
+            robots = robotManager.findValidOutgoingRobots();
+        } catch (Throwable t) {
+            log.error("loading robots failed from db.", t);
+        }
+        if (robots == null) {
+            return;
+        }
         // TODO 其他关联信息
 
         pussyPicker = robots.stream()

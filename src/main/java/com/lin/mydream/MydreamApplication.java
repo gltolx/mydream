@@ -21,6 +21,6 @@ public class MydreamApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         Robotx robotx = ReceivedRobotHolder.pick("e49f5b");
-        robotx.send(TextDingDTO.builder().content("苍南高中").mobiles("17826833386").build());
+        robotx.send(TextDingDTO.builder().content("苍南高中").build());
     }
 }

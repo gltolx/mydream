@@ -5,6 +5,7 @@ import com.lin.mydream.consts.MydreamException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.helpers.MessageFormatter;
@@ -77,6 +78,7 @@ public class CommonUtil {
         }
     }
 
+
     public static long getDistanceOfTwoDate(Date before, Date after) {
         long beforeTime = before.getTime();
         long afterTime = after.getTime();
@@ -95,9 +97,30 @@ public class CommonUtil {
         }
     }
 
+    public static long tryParseLong(String str) {
+        return tryParseLong(str, NumberUtils.LONG_ZERO);
+    }
+
+    /**
+     * 尝试将给定字符串转为Long型, 成功则返回该long值, 失败则返回默认值
+     *
+     * @param str          给定字符串
+     * @param defaultValue 默认值
+     */
+    public static long tryParseLong(String str, long defaultValue) {
+        if (StringUtils.isEmpty(str)) {
+            return defaultValue;
+        }
+        try {
+            return Long.parseLong(str);
+        } catch (NumberFormatException ignore) {
+        }
+        return defaultValue;
+    }
+
     public static void main(String[] args) throws ParseException {
-        System.out.println(getDistanceOfTwoDate(DateUtils.parseDate("2021-02-14 00:00:00", "yyyy-MM-dd HH:mm:ss"), new Date()));
-        System.out.println(getDistanceOfTwoDate(DateUtils.parseDate("2021-11-01 00:00:00", "yyyy-MM-dd HH:mm:ss"), new Date()));
+        Pair<String, String> pair = parseCommand(" fky");
+        System.out.println();
     }
 
 }

@@ -1,6 +1,7 @@
 package com.lin.mydream.manager;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.lin.mydream.config.RobotProperties;
 import com.lin.mydream.consts.MydreamException;
 import com.lin.mydream.controller.param.CreateRobotParam;
 import com.lin.mydream.mapper.RobotMapper;
@@ -8,6 +9,7 @@ import com.lin.mydream.model.Robot;
 import com.lin.mydream.model.base.BaseModel;
 import com.lin.mydream.model.enumerate.RobotEnum;
 import com.lin.mydream.util.CommonUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,10 @@ import java.util.*;
  */
 @Service
 public class RobotManager extends ServiceImpl<RobotMapper, Robot> {
+
+    @Autowired
+    private RobotProperties robotProperties;
+
     /**
      * 生成一个10位的outgoing token
      */
@@ -54,7 +60,6 @@ public class RobotManager extends ServiceImpl<RobotMapper, Robot> {
         this.initRobot(param, robotId);
         // 在pussyPicker里put一个机器人
         Robot robot = this.getById(robotId);
-
 
 
         return robotId;
@@ -102,12 +107,25 @@ public class RobotManager extends ServiceImpl<RobotMapper, Robot> {
     }
 
 
+    /**
+     * 捞出所有合法的机器人
+     * @return 机器人数组
+     */
     public List<Robot> findValidRobots() {
-        return CommonUtil.orEmpty(
-                () -> this.lambdaQuery()
-                        .eq(Robot::getStat, RobotEnum.Stat.valid.code())
-                        .list()
-        );
+        // 应用配置中的机器人
+        List<Robot> robots = new ArrayList<>(robotProperties.getDingRobots());
+        try {
+            // 从db捞的机器人
+            robots.addAll(
+                    CommonUtil.orEmpty(
+                            () -> this.lambdaQuery()
+                                    .eq(Robot::getStat, RobotEnum.Stat.valid.code())
+                                    .list()
+                    ));
+        } catch (Exception e) {
+            log.error("select robots from db error.",e);
+        }
+        return robots;
     }
 
     public List<Robot> findValidOutgoingRobots() {

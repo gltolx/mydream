@@ -8,7 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -31,8 +33,9 @@ public class TextDingDTO extends BaseDingMsgDTO {
     public TextDingDTO(String content, Boolean atAll, String mobiles) {
         super.setMsgtype("text");
         this.text = ImmutableMap.of("content", content);
-        List<String> mobileList = CommonUtil.orEmpty(
+        List<String> mobileList = StringUtils.isBlank(mobiles) ? Collections.emptyList() : CommonUtil.orEmpty(
                 () -> Splitter.on(",").omitEmptyStrings().splitToList(mobiles));
+
         this.at = ImmutableMap.of("isAtAll", BooleanUtils.isTrue(atAll), "atMobiles", mobileList);
     }
 

@@ -67,7 +67,7 @@ public class ReplyRouter implements InitializingBean {
         /////////////////////////////////////////////////////////////////////////
         //                            私人定制
         ////////////////////////////////////////////////////////////////////////
-
+        // ———————————————————— 记忆 ———————————————————————
         // 列出所有记忆 ｜ list remembers
         ROUTER_MAP.put("list remembers", command -> CommonUtil.format("your remembers are follows:\n{}", rememberService.listRemember(command)));
         // 创建记忆 | create remember/notify - 'fell in love with LMY' '2021-02-14' '17826833386,13639853155';
@@ -84,6 +84,9 @@ public class ReplyRouter implements InitializingBean {
         });
         // 唤醒记忆 | wake up remember
         ROUTER_MAP.put("wake up remember", command -> rememberService.wakeupRemember(command));
+
+        // ———————————————————— 传话 ———————————————————————
+        // TODO
     }
 
     /**
@@ -103,7 +106,7 @@ public class ReplyRouter implements InitializingBean {
             Pair<String, String> pair = CommonUtil.parseCommand(inputContent);
             Function<Command, String> fun = ROUTER_MAP.get(pair.getLeft());
             if (fun == null) {
-                throw new MydreamException("无法识别该命令:{}", pair.getLeft());
+                throw MydreamException.of("阿哦～我还不认识[{}]，主人快教教我吧(´･ω･`)", pair.getLeft());
             }
             Command command = Command.builder()
                     .ogt(outgoingToken)

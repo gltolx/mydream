@@ -56,7 +56,7 @@ public class Robotx {
      * 获取机器人webhook地址
      */
     public String makeWebhookUrl() {
-        Pair<Long, String> makeSign = SignUtil.makeSign(self().getSign());
+        Pair<Long, String> makeSign = SignUtil.makeSign(System.currentTimeMillis(), self().getSign());
         Long timestamp = makeSign.getLeft();
         String sign = makeSign.getRight();
         return String.format("https://oapi.dingtalk.com/robot/send?access_token=%s&timestamp=%d&sign=%s",

@@ -8,6 +8,7 @@ import com.lin.mydream.model.enumerate.RobotEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
@@ -78,7 +79,9 @@ public class Robot extends BaseModel {
         robot.setAccessToken(list.get(0));
         robot.setSign(list.get(1));
         robot.setOutgoingEnable(true);
-        robot.setOutgoingToken(list.get(3));
+        robot.setOutgoingToken(list.get(2));
+        robot.setAdmin(BooleanUtils.toBoolean(list.get(3)));
+        robot.setStat(RobotEnum.Stat.valid.getCode());
         return robot;
     }
 

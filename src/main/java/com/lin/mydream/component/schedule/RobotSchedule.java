@@ -11,6 +11,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -30,19 +31,25 @@ public class RobotSchedule {
     @Autowired
     private RememberService rememberService;
 
-    @Scheduled(cron = "0 0 10 * * ?")
+    @Scheduled(cron = "0 15 10 ? * MON-FRI")
     public void notifyEnjoyingWork() {
         this.travelAll(robotx -> robotx.send(TextDingDTO.atAll("上班啦，专注一下，早点下班！！^-^")));
     }
 
-    @Scheduled(cron = "0 0 18 * * ?")
-    public void notifyEnjoyingLife() {
+    @Scheduled(cron = "0 15 18 ? * MON-THU")
+    public void notifyEnjoyingLifeMon2Thu() {
         this.travelAll(robotx -> robotx.sendTwice(TextDingDTO.atAll("别卷了，下班吧，骚年！！")));
     }
 
-    @Scheduled(cron = "0 30 18 * * ?")
+    @Scheduled(cron = "0 15 18 ? * FRI")
+    public void notifyEnjoyingLifeFri() {
+        this.travelAll(robotx -> robotx.sendTwice(TextDingDTO.atAll("下班了。ta喜欢你，你喜欢这世界，世界喜欢今天周五，^o^")));
+    }
+
+
+    @Scheduled(cron = "0 15 19 ? * MON-FRI")
     public void notifyEnjoyingLife2() {
-        this.travelAll(robotx -> robotx.send(TextDingDTO.atAll("你不卷我不卷，生活处处有笑脸")));
+        this.travelAll(robotx -> robotx.send(TextDingDTO.atAll("你不卷我不卷，生活处处是笑脸")));
     }
 
 //    @Scheduled(cron = "0 0 21 * * ?")
@@ -50,7 +57,7 @@ public class RobotSchedule {
 //        this.travelAll(robotx -> robotx.send(TextDingDTO.normal("某些人，🙏真的球球你别再卷了")));
 //    }
 
-    @Scheduled(cron = "0 0 22 * * ?")
+    @Scheduled(cron = "0 0 22 ? * MON-FRI")
     public void notifyEnjoyingLife4() {
         this.travelAll(robotx -> robotx.send(TextDingDTO.normal("就在这一瞬间，你累了。也倦了。")));
     }
@@ -77,6 +84,9 @@ public class RobotSchedule {
             dates.add(DateUtils.addYears(now, -i));
         }
         List<Remember> remembers = rememberService.findByDatesIn(dates);
+        if (CollectionUtils.isEmpty(remembers)) {
+            return;
+        }
         Map<Long, Robotx> robotxMap = ReceivedRobotHolder.robotIdMap();
         remembers.forEach(x->{
                     Robotx robotx = robotxMap.get(x.getRobotId());
@@ -94,7 +104,8 @@ public class RobotSchedule {
      * 遍历所有的机器人并消费
      */
     public void travelAll(Consumer<Robotx> consumer) {
-        robotManager.findValidRobots()
+        robotManager
+                .findValidRobots()
                 .stream()
                 .map(Robotx::new)
                 .forEach(consumer);
