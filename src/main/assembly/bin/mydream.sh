@@ -17,8 +17,8 @@ APP_NAME=mydream
 BASE_HOME=$(dirname $bin_path)
 conf=${BASE_HOME}/conf/application.yml
 log=${BASE_HOME}/conf/logback.xml
-XMS=256m
-XMX=256m
+XMS=512m
+XMX=768m
 JAR='mydream-0.0.1-SNAPSHOT.jar'
 CLASS='com.lin.mydream.MydreamApplication'
 

@@ -5,6 +5,7 @@ import com.lin.mydream.manager.RobotManager;
 import com.lin.mydream.model.Remember;
 import com.lin.mydream.model.Robotx;
 import com.lin.mydream.service.RememberService;
+import com.lin.mydream.service.dto.MarkdownDingDTO;
 import com.lin.mydream.service.dto.TextDingDTO;
 import com.lin.mydream.util.CommonUtil;
 import org.apache.commons.lang3.time.DateUtils;
@@ -15,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Created on Milky Way Galaxy.
@@ -31,35 +33,35 @@ public class RobotSchedule {
     @Autowired
     private RememberService rememberService;
 
-    @Scheduled(cron = "0 15 10 ? * MON-FRI")
+    @Scheduled(cron = "0 05 10 ? * MON-FRI")
     public void notifyEnjoyingWork() {
         this.travelAll(robotx -> robotx.send(TextDingDTO.atAll("上班啦，专注一下，早点下班！！^-^")));
     }
 
-    @Scheduled(cron = "0 15 18 ? * MON-THU")
+    @Scheduled(cron = "0 05 15 ? * MON-FRI")
+    public void notifyEnjoyingFishing() {
+        this.travelAll(robotx -> robotx.send(TextDingDTO.normal("世界纷纷扰扰，抵不过一杯温水，一泡尿。（快去行动吧～）")));
+    }
+
+    @Scheduled(cron = "0 05 18 ? * MON-THU")
     public void notifyEnjoyingLifeMon2Thu() {
-        this.travelAll(robotx -> robotx.sendTwice(TextDingDTO.atAll("别卷了，下班吧，骚年！！")));
+        this.travelAll(robotx -> robotx.send(TextDingDTO.atAll("别卷了，下班吧，少年！！")));
     }
 
-    @Scheduled(cron = "0 15 18 ? * FRI")
+    @Scheduled(cron = "0 05 18 ? * FRI")
     public void notifyEnjoyingLifeFri() {
-        this.travelAll(robotx -> robotx.sendTwice(TextDingDTO.atAll("下班了。ta喜欢你，你喜欢这世界，世界喜欢今天周五，^o^")));
+        this.travelAll(robotx -> robotx.send(TextDingDTO.atAll("下班了 ———— ta喜欢你，你喜欢这世界，世界只喜欢今天，因为～今天是周五。")));
     }
 
-
-    @Scheduled(cron = "0 15 19 ? * MON-FRI")
+    @Scheduled(cron = "0 55 19 ? * MON-FRI")
     public void notifyEnjoyingLife2() {
         this.travelAll(robotx -> robotx.send(TextDingDTO.atAll("你不卷我不卷，生活处处是笑脸")));
     }
 
-//    @Scheduled(cron = "0 0 21 * * ?")
-//    public void notifyEnjoyingLife3() {
-//        this.travelAll(robotx -> robotx.send(TextDingDTO.normal("某些人，🙏真的球球你别再卷了")));
-//    }
 
     @Scheduled(cron = "0 0 22 ? * MON-FRI")
     public void notifyEnjoyingLife4() {
-        this.travelAll(robotx -> robotx.send(TextDingDTO.normal("就在这一瞬间，你累了。也倦了。")));
+        this.travelAll(robotx -> robotx.send(TextDingDTO.normal("就在这一瞬间，你累了，也倦了")));
     }
 
     @Scheduled(cron = "0 30 9 * * ?")
@@ -88,16 +90,27 @@ public class RobotSchedule {
             return;
         }
         Map<Long, Robotx> robotxMap = ReceivedRobotHolder.robotIdMap();
-        remembers.forEach(x->{
-                    Robotx robotx = robotxMap.get(x.getRobotId());
-                    if (robotx == null) {
-                        return;
-                    }
-                    long days = CommonUtil.getDistanceOfTwoDate(x.getRememberTime(), now);
-                    String diffTime = CommonUtil.transferDays(days);
-                    String text = CommonUtil.format("亲爱的，^_^今天是{}{}的日子。回首山河已是秋，再看山河复长流。去发现，去沉淀，去纪念，去写一封信@未来的自己吧～", x.getName(), diffTime);
-                    robotx.sendAt(text, x.getReceiver());
-                });
+
+        Map<Long, List<Remember>> robotRemMap = remembers.stream()
+                .collect(Collectors.groupingBy(Remember::getRobotId));
+
+        robotRemMap.forEach((robotId, rems) -> {
+            Robotx robotx = robotxMap.get(robotId);
+            if (robotx == null) {
+                return;
+            }
+            StringBuilder text = new StringBuilder("#### 回首山河已是秋，再落风花月对酒\n> 亲爱的，");
+            rems.forEach(x -> {
+                long days = CommonUtil.getDistanceOfTwoDate(x.getRememberTime(), now);
+                String diffTime = CommonUtil.transferDays(days);
+                text.append(CommonUtil.format("\n> 今天是{}{}的日子", x.getName(), diffTime));
+            });
+            String allReceiver = rems.stream().map(Remember::getReceiver).collect(Collectors.joining(","));
+            text.append("\n> __去发现，去纪念，去写一封信给未来的自己吧～__");
+            MarkdownDingDTO markdownMsg = MarkdownDingDTO.builder()
+                    .title("记忆唤醒").markdownText(text.toString()).atAll(false).atMobiles(allReceiver).build();
+            robotx.send(markdownMsg);
+        });
     }
 
     /**

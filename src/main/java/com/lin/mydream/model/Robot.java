@@ -11,10 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -112,6 +109,7 @@ public class Robot extends BaseModel {
         // 后续创建识别这个outgoingToken追加信息
         entity.setOutgoingToken(token);
         entity.setStat(RobotEnum.Stat.initial.getCode());
+        entity.setUpdateTime(new Date());
 //        entity.setName("0");
         return entity;
     }

@@ -6,7 +6,9 @@ import com.lin.mydream.model.Robotx;
 import com.lin.mydream.service.RememberService;
 import com.lin.mydream.service.RobotService;
 import com.lin.mydream.service.dto.Command;
+import com.lin.mydream.service.dto.MarkdownDingDTO;
 import com.lin.mydream.util.CommonUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.InitializingBean;
@@ -25,6 +27,7 @@ import java.util.function.Function;
  * @author <a href="mailto:linfeng.gdlk@gmail.com">Lin Xiao</a> 2021/11/17.
  * @desc 消息接收路由分发模板
  */
+@Slf4j
 @Component
 public class ReplyRouter implements InitializingBean {
 
@@ -69,7 +72,13 @@ public class ReplyRouter implements InitializingBean {
         ////////////////////////////////////////////////////////////////////////
         // ———————————————————— 记忆 ———————————————————————
         // 列出所有记忆 ｜ list remembers
-        ROUTER_MAP.put("list remembers", command -> CommonUtil.format("your remembers are follows:\n{}", rememberService.listRemember(command)));
+        ROUTER_MAP.put("list remembers", command -> {
+            String rememberString = rememberService.listRemember(command);
+            if (StringUtils.isBlank(rememberString)) {
+                return "your remembers are empty";
+            }
+            return CommonUtil.format("your remembers are follows:\n{}", rememberString);
+        });
         // 创建记忆 | create remember/notify - 'fell in love with LMY' '2021-02-14' '17826833386,13639853155';
         ROUTER_MAP.put("create remember", command -> {
             rememberService.createRemember(command);
@@ -83,10 +92,16 @@ public class ReplyRouter implements InitializingBean {
             return "delete success.";
         });
         // 唤醒记忆 | wake up remember
-        ROUTER_MAP.put("wake up remember", command -> rememberService.wakeupRemember(command));
+        ROUTER_MAP.put("wake up", command -> rememberService.wakeupRemember(command));
+        ROUTER_MAP.put("wake up remember", ROUTER_MAP.get("wake up"));
+        ROUTER_MAP.put("wake up remembers", ROUTER_MAP.get("wake up"));
 
         // ———————————————————— 传话 ———————————————————————
         // TODO
+    }
+
+    public void execute(String outgoingToken, String inputContent) {
+        execute(outgoingToken, inputContent, 0, null);
     }
 
     /**
@@ -94,7 +109,7 @@ public class ReplyRouter implements InitializingBean {
      *
      * @param inputContent 用户键入的信息
      */
-    public void execute(String outgoingToken, String inputContent) {
+    public void execute(String outgoingToken, String inputContent, int type, String title) {
         Assert.isTrue(StringUtils.isNotBlank(outgoingToken), "outgoingToken is empty.");
 
         Robotx robotx = ReceivedRobotHolder.pick(outgoingToken);
@@ -115,8 +130,15 @@ public class ReplyRouter implements InitializingBean {
                     .build();
             // 执行调用逻辑，返回消息
             String finalReply = fun.apply(command);
-            robotx.send(finalReply);
+            if (type == 0) {
+                robotx.send(finalReply);
+            } else if (type == 1) {
+                MarkdownDingDTO markdownMsg = MarkdownDingDTO.builder()
+                        .title(title).markdownText(inputContent).atAll(Boolean.FALSE).build();
+                robotx.send(markdownMsg);
+            }
         } catch (Exception e) {
+            log.error("收发异常 - input:{}, outgoingToken:{}", inputContent, outgoingToken);
             robotx.send(e.getMessage());
         }
 

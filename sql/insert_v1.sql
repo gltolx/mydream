@@ -15,3 +15,8 @@
 insert into my_robot(`access_token`, `robot_sign`, `outgoing_enable`, `outgoing_token`, `is_admin`)
 values ('f0676f432ae1da77af9a6219296982c23741ae23ea6f7638bc4bfebfb8d8771a',
         'SECc99725f7915d0314e7c77eed43f51376c47736116ae567374f3fb3f4544a1a6c', true, 'e49f5b', true);
+
+
+insert into my_robot(`access_token`, `robot_sign`, `outgoing_enable`, `outgoing_token`, `is_admin`)
+values ('bf8625341582063e835661a1dd664a59bc32547e0e964e09fb2469b0ce671282',
+        'SEC7fd4798ab65fabf250b2b48e27edc4a167d093201fdd4f42b1f9a5e2e0cc11a2', true, 'R53pvt4', true);

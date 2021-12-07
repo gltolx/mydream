@@ -1,10 +1,10 @@
 package com.lin.mydream.service;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.lin.mydream.component.ReceivedRobotHolder;
 import com.lin.mydream.consts.MydreamException;
 import com.lin.mydream.manager.RememberManager;
 import com.lin.mydream.model.Remember;
-import com.lin.mydream.model.Robotx;
 import com.lin.mydream.model.enumerate.RobotEnum;
 import com.lin.mydream.service.dto.Command;
 import com.lin.mydream.util.CommonUtil;
@@ -39,11 +39,11 @@ public class RememberService {
         Long robotId = ReceivedRobotHolder.id(command.ogt());
         List<Remember> remembers = rememberManager.listByRobotId(robotId);
         Date now = new Date();
-        StringBuilder sb = new StringBuilder("因为记忆，爱才弥足珍贵 ———— \n");
-        remembers.forEach(x-> {
+        StringBuilder sb = new StringBuilder("##### 因为记忆，爱才弥足珍贵 —— ");
+        remembers.forEach(x -> {
             long days = CommonUtil.getDistanceOfTwoDate(x.getRememberTime(), now);
             String diffTime = CommonUtil.transferDays(days);
-            sb.append(CommonUtil.format("> 距{}已经{}了", x.getName(), diffTime));
+            sb.append(CommonUtil.format("\n> 距{}已经{}了", x.getName(), diffTime));
         });
 
         return sb.toString();
@@ -97,10 +97,11 @@ public class RememberService {
 
         RobotEnum.RememberType rememberType = RobotEnum.RememberType.judge(command.head());
         Date rememberTime = null;
+        String theDate = list.get(1);
         try {
-            rememberTime = DateUtils.parseDate(list.get(1), "yyyy-MM-dd HH:mm:ss");
+            rememberTime = DateUtils.parseDate(theDate, theDate.length() > 10 ? "yyyy-MM-dd HH:mm:ss" : "yyyy-MM-dd");
         } catch (ParseException e) {
-            throw MydreamException.of("date parse failed. input:{}", list.get(1));
+            throw MydreamException.of("date parse failed. input:{}", theDate);
         }
 
         Remember remember = new Remember()
@@ -117,9 +118,9 @@ public class RememberService {
 
     public List<Remember> findByDatesIn(List<Date> dates) {
 
-        return CommonUtil.orEmpty(() -> rememberManager.lambdaQuery()
-                .in(x -> x.getRememberTime(), dates)
-                .list());
+        return CommonUtil.orEmpty(() ->
+                rememberManager.list(Wrappers.<Remember>query().in("remember_time", dates))
+        );
     }
 }
 
