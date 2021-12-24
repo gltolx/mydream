@@ -5,8 +5,12 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.util.MapUtil;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -47,6 +51,21 @@ public class OkHttpUtil {
                 .url(url)
                 .post(RequestBody.create(mediaType, body))
 //                .addHeader("Content-Type", "application/json; charset=utf-8")
+                .build();
+
+        return _callReturn(request);
+    }
+
+    public static String post(String url, String body, Map<String, String> headers) {
+        MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+        Headers.Builder headersBuilder = new Headers.Builder();
+        if (headers != null && !headers.isEmpty()) {
+            headers.forEach(headersBuilder::add);
+        }
+        Request request = new Request.Builder()
+                .url(url)
+                .post(RequestBody.create(mediaType, body))
+                .headers(headersBuilder.build())
                 .build();
 
         return _callReturn(request);

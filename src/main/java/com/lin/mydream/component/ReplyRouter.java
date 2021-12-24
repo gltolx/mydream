@@ -1,5 +1,6 @@
 package com.lin.mydream.component;
 
+import com.lin.mydream.component.helper.TencentChatBotHelper;
 import com.lin.mydream.consts.MydreamException;
 import com.lin.mydream.controller.param.CreateRobotParam;
 import com.lin.mydream.model.Robotx;
@@ -7,6 +8,7 @@ import com.lin.mydream.service.RememberService;
 import com.lin.mydream.service.RobotService;
 import com.lin.mydream.service.dto.Command;
 import com.lin.mydream.service.dto.MarkdownDingDTO;
+import com.lin.mydream.service.dto.tencent.ReplyDTO;
 import com.lin.mydream.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -36,9 +38,9 @@ public class ReplyRouter implements InitializingBean {
     @Autowired
     private RememberService rememberService;
     /**
-     * command -> Function{Command, bizReply}
+     * 命令路由, command -> Function{Command, bizReply}
      */
-    private final Map<String, Function<Command, String>> ROUTER_MAP = new ConcurrentHashMap<>();
+    private final Map<String, Function<Command, String>> CMD_ROUTER = new ConcurrentHashMap<>();
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -46,13 +48,13 @@ public class ReplyRouter implements InitializingBean {
         //                            操作机器人
         ////////////////////////////////////////////////////////////////////////
         // 创建机器人 ｜ 1.获取一个outgoingToken ｜ acquire token
-        ROUTER_MAP.put("acquire token", command -> CommonUtil.format(
+        CMD_ROUTER.put("acquire token", command -> CommonUtil.format(
                 "your token is: {}, the token is valid for half an hour, please create robot as soon as possible."
                 , robotService.getTokenOnPreCreate()));
-        ROUTER_MAP.put("acquire outgoing token", ROUTER_MAP.get("acquire token"));
+        CMD_ROUTER.put("acquire outgoing token", CMD_ROUTER.get("acquire token"));
 
         // 创建机器人 ｜ 2.创建 ｜ create robot - [ACCESS_TOKEN],[SIGN],[OUTGOING_TOKEN]
-        ROUTER_MAP.put("create robot", command -> {
+        CMD_ROUTER.put("create robot", command -> {
             CreateRobotParam p = CreateRobotParam.of(command);
             Long newRobotId = robotService.createByConfirmingToken(p);
             CommonUtil.format("create success, SEQUENCE ID:[{}], enjoy it.");
@@ -60,7 +62,7 @@ public class ReplyRouter implements InitializingBean {
         });
 
         // 删除机器人 ｜ delete robot - [ACCESS_TOKEN],[OUTGOING_TOKEN]
-        ROUTER_MAP.put("delete robot", command -> {
+        CMD_ROUTER.put("delete robot", command -> {
             if (!robotService.deleteByAccessToken(command.getBody())) {
                 robotService.deleteByOutgoingToken(command.getBody());
             }
@@ -72,7 +74,7 @@ public class ReplyRouter implements InitializingBean {
         ////////////////////////////////////////////////////////////////////////
         // ———————————————————— 记忆 ———————————————————————
         // 列出所有记忆 ｜ list remembers
-        ROUTER_MAP.put("list remembers", command -> {
+        CMD_ROUTER.put("list remembers", command -> {
             String rememberString = rememberService.listRemember(command);
             if (StringUtils.isBlank(rememberString)) {
                 return "your remembers are empty";
@@ -80,21 +82,21 @@ public class ReplyRouter implements InitializingBean {
             return CommonUtil.format("your remembers are follows:\n{}", rememberString);
         });
         // 创建记忆 | create remember/notify - 'fell in love with LMY' '2021-02-14' '17826833386,13639853155';
-        ROUTER_MAP.put("create remember", command -> {
+        CMD_ROUTER.put("create remember", command -> {
             rememberService.createRemember(command);
             return "create success.";
         });
-        ROUTER_MAP.put("create notify", ROUTER_MAP.get("create remember"));
+        CMD_ROUTER.put("create notify", CMD_ROUTER.get("create remember"));
 
         // 删除记忆 | delete remember - like 'love';
-        ROUTER_MAP.put("delete remember", command -> {
+        CMD_ROUTER.put("delete remember", command -> {
             rememberService.deleteRemember(command);
             return "delete success.";
         });
         // 唤醒记忆 | wake up remember
-        ROUTER_MAP.put("wake up", command -> rememberService.wakeupRemember(command));
-        ROUTER_MAP.put("wake up remember", ROUTER_MAP.get("wake up"));
-        ROUTER_MAP.put("wake up remembers", ROUTER_MAP.get("wake up"));
+        CMD_ROUTER.put("wake up", command -> rememberService.wakeupRemember(command));
+        CMD_ROUTER.put("wake up remember", CMD_ROUTER.get("wake up"));
+        CMD_ROUTER.put("wake up remembers", CMD_ROUTER.get("wake up"));
 
         // ———————————————————— 传话 ———————————————————————
         // TODO
@@ -119,15 +121,13 @@ public class ReplyRouter implements InitializingBean {
 
         try {
             Pair<String, String> pair = CommonUtil.parseCommand(inputContent);
-            Function<Command, String> fun = ROUTER_MAP.get(pair.getLeft());
+            Function<Command, String> fun = CMD_ROUTER.get(pair.getLeft());
             if (fun == null) {
-                throw MydreamException.of("阿哦～我还不认识[{}]，主人快教教我吧(´･ω･`)", pair.getLeft());
+                // 既然不认识命令那就开启闲聊模式^_^
+                ReplyDTO replyDTO = TencentChatBotHelper.chat(pair.getLeft());
+                robotx.send(replyDTO.getReply());
             }
-            Command command = Command.builder()
-                    .ogt(outgoingToken)
-                    .head(pair.getLeft())
-                    .body(pair.getRight())
-                    .build();
+            Command command = Command.builder().ogt(outgoingToken).head(pair.getLeft()).body(pair.getRight()).build();
             // 执行调用逻辑，返回消息
             String finalReply = fun.apply(command);
             if (markdownTitle == null) {
