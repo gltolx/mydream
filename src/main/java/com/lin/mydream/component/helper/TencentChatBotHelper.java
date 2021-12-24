@@ -1,5 +1,6 @@
 package com.lin.mydream.component.helper;
 
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lin.mydream.service.dto.tencent.ReplyDTO;
 import com.lin.mydream.util.OkHttpUtil;
@@ -67,23 +68,24 @@ public class TencentChatBotHelper {
         if (log.isInfoEnabled()) {
             log.info("input:{}, output:{}", msg, result);
         }
-        ObjectMapper mapper = new ObjectMapper();
-        TcResponse tcResponse = mapper.readValue(result, TcResponse.class);
-        String reply = String.valueOf(tcResponse.fetch("Reply"));
-        Float confidence = (Float) tcResponse.fetch("Confidence");
-        return new ReplyDTO(reply, confidence)
-                .desensitization(); // 脱敏
+        JSONObject respJson = JSONObject.parseObject(result).getJSONObject("Response");
+
+        String reply = respJson.getString("Reply");
+        Float confidence = respJson.getFloat("Confidence");
+        return new ReplyDTO(reply, confidence).desensitization(); // 脱敏
     }
 
-    @Data
-    public static class TcResponse {
-        private Map<String, Object> response;
-
-        public Object fetch(String field) {
-            return Optional.ofNullable(response)
-                    .map(x -> x.get(field))
-                    .orElse(null);
-        }
+    public static void main(String[] args) throws Exception {
+        String re = "{\"Response\":{\"Reply\":\"好的，那晚安啦\",\"Confidence\":1,\"RequestId\":\"067c0dbc-9132-4f52-93e7-8b38a8186187\"}}";
+//        ObjectMapper mapper = new ObjectMapper();
+//        TcResponse tcResponse = mapper.readValue(re, TcResponse.class);
+//        String reply = String.valueOf(tcResponse.fetchReply());
+//        Float confidence = (Float) tcResponse.fetchConfidence();
+        JSONObject jsonObject = JSONObject.parseObject(re);
+        JSONObject responseJson = jsonObject.getJSONObject("Response");
+        String reply = responseJson.getString("Reply");
+        String confidence = responseJson.getString("Confidence");
+        System.out.println();
     }
 
 
