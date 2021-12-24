@@ -47,23 +47,11 @@ public class DingController {
 
     @RequestMapping(value = "channel", method = RequestMethod.POST)
     public String channel(@RequestBody Map<String, Object> map, HttpServletRequest request) {
-//        map.forEach((k, v) -> log.info("key:{}, value:{}", k, v));
-        log.info("ding channel - request:{}, requestURI:{}, requestURL:{}"
-                , request.toString(), request.getRequestURI(), request.getRequestURL().toString());
         Long timestamp = CommonUtil.tryParseLong(request.getHeader("timestamp"));
-        String sign = request.getHeader("sign");
-        log.info("ding channel - header:[timestamp:{}, sign:{}], requestBody:{}", timestamp, sign, map);
-//        SignUtil.checkSign(timestamp, sign, )
         String token = request.getParameter("token");
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            String h = headerNames.nextElement();
-            log.info("ding channel - header:[{}], value:{}", h, request.getHeader(h));
-        }
-        log.info("ding channel - param:[token:{}]", token);
+        log.info("ding channel - header:[timestamp:{}, sign:{}], requestBody:{}, parameter:[token:{}]", timestamp, request.getHeader("sign"), map, token);
         Map<String, String> contentMap = (Map<String, String>) map.get("text");
         replyRouter.execute(token, contentMap.get("content"));
-
-        return "OK~~~";
+        return "OK~";
     }
 }

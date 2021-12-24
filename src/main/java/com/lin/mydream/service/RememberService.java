@@ -43,7 +43,9 @@ public class RememberService {
         remembers.forEach(x -> {
             long days = CommonUtil.getDistanceOfTwoDate(x.getRememberTime(), now);
             String diffTime = CommonUtil.transferDays(days);
-            sb.append(CommonUtil.format("\n> 距{}已经{}了", x.getName(), diffTime));
+
+            // TODO 未来记忆的文案
+            sb.append(CommonUtil.format(days > 0 ? "\n> 距{}已经{}了" : "\n> 距{}还剩{}", x.getName(), diffTime));
         });
 
         return sb.toString();
@@ -75,7 +77,7 @@ public class RememberService {
             throw MydreamException.of("command invalid [{}], please input like 'delete remember - like \"love\"'", command.body());
         }
 
-        return rememberManager.deleteLike(robotId, list.get(list.size()));
+        return rememberManager.deleteLike(robotId, list.get(list.size() - 1));
     }
 
     /**

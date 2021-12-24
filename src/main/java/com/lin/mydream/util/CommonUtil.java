@@ -86,13 +86,14 @@ public class CommonUtil {
     }
 
     public static String transferDays(long days) {
-        if (days <= 365L) {
-            return days + "天";
+        long d = Math.abs(days);
+        if (d <= 365L) {
+            return d + "天";
         } else {
-            if (days % 365 == 0) {
-                return (days / 365) + "周年";
+            if (d % 365 == 0) {
+                return (d / 365) + "周年";
             } else {
-                return days + "天";
+                return d + "天";
             }
         }
     }

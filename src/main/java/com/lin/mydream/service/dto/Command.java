@@ -49,4 +49,11 @@ public class Command {
                 .trimResults()
                 .splitToList(body));
     }
+
+    public static void main(String[] args) {
+        Command c = Command.builder().head("delete remember").body("like '哭晕' 'ddd'").build();
+        List<String> list = c.extractKeysFromBody();
+
+        System.out.println();
+    }
 }

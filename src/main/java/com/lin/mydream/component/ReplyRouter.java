@@ -101,7 +101,7 @@ public class ReplyRouter implements InitializingBean {
     }
 
     public void execute(String outgoingToken, String inputContent) {
-        execute(outgoingToken, inputContent, 0, null);
+        execute(outgoingToken, inputContent, null);
     }
 
     /**
@@ -109,7 +109,7 @@ public class ReplyRouter implements InitializingBean {
      *
      * @param inputContent 用户键入的信息
      */
-    public void execute(String outgoingToken, String inputContent, int type, String title) {
+    public void execute(String outgoingToken, String inputContent, String markdownTitle) {
         Assert.isTrue(StringUtils.isNotBlank(outgoingToken), "outgoingToken is empty.");
 
         Robotx robotx = ReceivedRobotHolder.pick(outgoingToken);
@@ -130,15 +130,15 @@ public class ReplyRouter implements InitializingBean {
                     .build();
             // 执行调用逻辑，返回消息
             String finalReply = fun.apply(command);
-            if (type == 0) {
+            if (markdownTitle == null) {
                 robotx.send(finalReply);
-            } else if (type == 1) {
+            } else {
                 MarkdownDingDTO markdownMsg = MarkdownDingDTO.builder()
-                        .title(title).markdownText(inputContent).atAll(Boolean.FALSE).build();
+                        .title(markdownTitle).markdownText(inputContent).atAll(Boolean.FALSE).build();
                 robotx.send(markdownMsg);
             }
         } catch (Exception e) {
-            log.error("收发异常 - input:{}, outgoingToken:{}", inputContent, outgoingToken);
+            log.error("收发异常 - input:{}, outgoingToken:{}", inputContent, outgoingToken, e);
             robotx.send(e.getMessage());
         }
 
