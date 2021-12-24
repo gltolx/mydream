@@ -71,7 +71,8 @@ public class TencentChatBotHelper {
         TcResponse tcResponse = mapper.readValue(result, TcResponse.class);
         String reply = String.valueOf(tcResponse.fetch("Reply"));
         Float confidence = (Float) tcResponse.fetch("Confidence");
-        return new ReplyDTO(reply, confidence);
+        return new ReplyDTO(reply, confidence)
+                .desensitization(); // 脱敏
     }
 
     @Data

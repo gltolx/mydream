@@ -3,6 +3,9 @@ package com.lin.mydream.service.dto.tencent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.logging.log4j.util.Strings;
+
+import java.util.Optional;
 
 /**
  * Created on Milky Way Galaxy.
@@ -23,4 +26,18 @@ public class ReplyDTO {
      * 自信度
      */
     private Float confidence;
+
+    /**
+     * 脱敏
+     */
+    public ReplyDTO desensitization() {
+        Optional.ofNullable(this.reply)
+                .ifPresent(
+                        x -> {
+                            String desReply = x.replaceAll("腾讯", Strings.EMPTY);
+                            this.setReply(desReply);
+                        }
+                );
+        return this;
+    }
 }
