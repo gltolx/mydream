@@ -37,6 +37,8 @@ public class ReplyRouter implements InitializingBean {
     private RobotService robotService;
     @Autowired
     private RememberService rememberService;
+    @Autowired
+    private TencentChatBotHelper tencentChatBotHelper;
     /**
      * 命令路由, command -> Function{Command, bizReply}
      */
@@ -121,13 +123,14 @@ public class ReplyRouter implements InitializingBean {
 
         try {
             Pair<String, String> pair = CommonUtil.parseCommand(inputContent);
-            Function<Command, String> fun = CMD_ROUTER.get(pair.getLeft());
+            String input = pair.getLeft(); // 经过一轮校验后的input
+            Function<Command, String> fun = CMD_ROUTER.get(input);
             if (fun == null) {
                 // 既然不认识命令那就开启闲聊模式^_^
-                ReplyDTO replyDTO = TencentChatBotHelper.chat(pair.getLeft());
+                ReplyDTO replyDTO = tencentChatBotHelper.chat(input);
                 robotx.send(replyDTO.getReply());
             }
-            Command command = Command.builder().ogt(outgoingToken).head(pair.getLeft()).body(pair.getRight()).build();
+            Command command = Command.builder().ogt(outgoingToken).head(input).body(pair.getRight()).build();
             // 执行调用逻辑，返回消息
             String finalReply = fun.apply(command);
             if (markdownTitle == null) {

@@ -3,10 +3,9 @@ package com.lin.mydream.component.helper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lin.mydream.service.dto.tencent.ReplyDTO;
 import com.lin.mydream.util.OkHttpUtil;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Mac;
@@ -30,10 +29,15 @@ import java.util.*;
 public class TencentChatBotHelper {
 
     private final static Charset UTF8 = StandardCharsets.UTF_8;
-    private final static String SECRET_ID = "AKIDnQmsiHZaMr52jALFsFK8gz1mFSO3SaR2";
-    private final static String SECRET_KEY = "MRGo55pIUP3RYOxGaeRxCAqFOGrBF1Wl";
+//    private final static String SECRET_ID = "AKIDnQmsiHZaMr52jALFsFK8gz1mFSO3SaR2";
+//    private final static String SECRET_KEY = "MRGo55pIUP3RYOxGaeRxCAqFOGrBF1Wl";
     private final static String CT_JSON = "application/json; charset=utf-8";
     private final static String SIGN_ALGORITHM = "TC3-HMAC-SHA256";
+
+    @Value("${tencent.secret-id}")
+    private String secretId;
+    @Value("${tencent.secret-key}")
+    private String secretKey;
 
 
     /**
@@ -43,12 +47,12 @@ public class TencentChatBotHelper {
      * @return 返回闲聊消息
      * @throws Exception
      */
-    public static ReplyDTO chat(String msg) throws Exception {
+    public ReplyDTO chat(String msg) throws Exception {
         String payload = "{\"Query\": \"" + msg + "\"}";
 
         String host = "nlp.tencentcloudapi.com";
         String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
-        String authorization = makeSign("nlp", host, payload, timestamp);
+        String authorization = this.makeSign("nlp", host, payload, timestamp);
 
         TreeMap<String, String> headers = new TreeMap<>();
         headers.put("Authorization", authorization);
@@ -92,7 +96,7 @@ public class TencentChatBotHelper {
      * @return 签名
      * @throws Exception
      */
-    private static String makeSign(String service, String host, String payload, String timestamp) throws Exception {
+    private String makeSign(String service, String host, String payload, String timestamp) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         // 注意时区，否则容易出错
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -116,13 +120,13 @@ public class TencentChatBotHelper {
         String stringToSign = SIGN_ALGORITHM + "\n" + timestamp + "\n" + credentialScope + "\n" + hashedCanonicalRequest;
 
         // ************* 步骤 3：计算签名 *************
-        byte[] secretDate = hmac256(("TC3" + SECRET_KEY).getBytes(UTF8), date);
+        byte[] secretDate = hmac256(("TC3" + secretKey).getBytes(UTF8), date);
         byte[] secretService = hmac256(secretDate, service);
         byte[] secretSigning = hmac256(secretService, "tc3_request");
         String signature = DatatypeConverter.printHexBinary(hmac256(secretSigning, stringToSign)).toLowerCase();
 
         // ************* 步骤 4：拼接 Authorization *************
-        String authorization = SIGN_ALGORITHM + " " + "Credential=" + SECRET_ID + "/" + credentialScope + ", "
+        String authorization = SIGN_ALGORITHM + " " + "Credential=" + secretId + "/" + credentialScope + ", "
                 + "SignedHeaders=" + signedHeaders + ", " + "Signature=" + signature;
 
         if (log.isDebugEnabled()) {
