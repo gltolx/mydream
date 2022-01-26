@@ -35,7 +35,7 @@ public class RobotSchedule {
 
     @Scheduled(cron = "0 05 10 ? * MON-FRI")
     public void notifyEnjoyingWork() {
-        this.travelAll(robotx -> robotx.send(TextDingDTO.atAll("上班啦，专注一下，早点下班！！^-^")));
+        this.travelAll(robotx -> robotx.send(TextDingDTO.normal("上班啦，专注一下，早点下班！！^-^")));
     }
 
     @Scheduled(cron = "0 05 15 ? * MON-FRI")
@@ -53,9 +53,9 @@ public class RobotSchedule {
         this.travelAll(robotx -> robotx.send(TextDingDTO.atAll("下班了 ———— ta喜欢你，你喜欢这世界，世界只喜欢今天，因为～今天是周五。")));
     }
 
-    @Scheduled(cron = "0 55 19 ? * MON-FRI")
+    @Scheduled(cron = "0 55 19 ? * MON-THU")
     public void notifyEnjoyingLife2() {
-        this.travelAll(robotx -> robotx.send(TextDingDTO.atAll("你不卷我不卷，生活处处是笑脸")));
+        this.travelAll(robotx -> robotx.send(TextDingDTO.normal("你不卷我不卷，生活处处是笑脸")));
     }
 
 
@@ -101,7 +101,7 @@ public class RobotSchedule {
         for (int i = 1; i <= 10; i++) { // 10周年以内
             dates.add(DateUtils.addYears(now, -i));
         }
-        List<Remember> remembers = rememberService.findByDatesIn(dates);
+        List<Remember> remembers = rememberService.findRemembersByDatesIn(dates);
         if (CollectionUtils.isEmpty(remembers)) {
             return;
         }
@@ -130,6 +130,42 @@ public class RobotSchedule {
                     .title("记忆唤醒").markdownText(text.toString()).atAll(false).atMobiles(allReceiver).build();
             robotx.send(markdownMsg);
         });
+    }
+
+    /**
+     * 每15s去扫描一次前1分钟后5s的提醒
+     */
+    @Scheduled(cron = "0/15 * * * * ?")
+    public void notify_() {
+        Date now = new Date();
+        Date begin = DateUtils.addSeconds(now, -60);
+        Date end = DateUtils.addSeconds(now, +5);
+
+        Map<Long, Robotx> robotxMap = ReceivedRobotHolder.robotIdMap();
+
+        rememberService
+                .findNotifiesByDatesRange(begin, end)
+                .stream()
+                .collect(Collectors.groupingBy(Remember::getRobotId))
+                .forEach((robotId, notifies) ->
+                        Optional.ofNullable(robotxMap.get(robotId))
+                                .ifPresent(robotx -> {
+                                    StringBuilder text = new StringBuilder("### 重要提醒\n> 亲爱的，");
+                                    notifies.sort(Comparator.comparing(Remember::getRememberTime));
+                                    notifies.forEach(x -> text.append(CommonUtil.format("\n> 「{}」可别忘了哟～", x.getName())));
+                                    String allReceiver = notifies.stream().map(Remember::getReceiver).collect(Collectors.joining(","));
+                                    text.append("\n> 🌟🌟🌟");
+
+                                    MarkdownDingDTO markdownMsg = MarkdownDingDTO
+                                            .builder()
+                                            .title("记忆唤醒【快来看看(*≧ω≦)】")
+                                            .markdownText(text.toString())
+                                            .atAll(false)
+                                            .atMobiles(allReceiver)
+                                            .build();
+                                    robotx.send(markdownMsg);
+                                }));
+
     }
 
     /**

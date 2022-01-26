@@ -88,10 +88,6 @@ public class RobotEnum {
             return getCode();
         }
 
-        default String name() {
-            return getName();
-        }
-
         default boolean equalsCode(C code) {
             return code != null && code.equals(getCode());
         }

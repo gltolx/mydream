@@ -118,10 +118,35 @@ public class RememberService {
         return rememberManager.save(remember);
     }
 
-    public List<Remember> findByDatesIn(List<Date> dates) {
+    public List<Remember> findNotifiesByDatesRange(Date begin, Date end) {
+
+        return findByDatesRange(begin, end, RobotEnum.RememberType.notify);
+    }
+
+    public List<Remember> findRemembersByDatesIn(List<Date> dates) {
+
+        return findByDatesIn(dates, RobotEnum.RememberType.remember);
+    }
+
+
+    public List<Remember> findByDatesIn(List<Date> dates, RobotEnum.RememberType rType) {
 
         return CommonUtil.orEmpty(() ->
-                rememberManager.list(Wrappers.<Remember>query().in("remember_time", dates))
+                rememberManager.list(Wrappers.<Remember>query()
+                        .in("remember_time", dates)
+                        .eq("remember_type", rType.code())
+                )
+        );
+    }
+
+    public List<Remember> findByDatesRange(Date begin, Date end, RobotEnum.RememberType rType) {
+
+        return CommonUtil.orEmpty(() ->
+                rememberManager.list(Wrappers.<Remember>query()
+                        .ge("remember_time", begin)
+                        .le("remember_time", end)
+                        .eq("remember_type", rType.code())
+                )
         );
     }
 }
