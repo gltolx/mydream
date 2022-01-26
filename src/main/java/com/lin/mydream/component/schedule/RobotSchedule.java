@@ -4,6 +4,7 @@ import com.lin.mydream.component.ReceivedRobotHolder;
 import com.lin.mydream.manager.RobotManager;
 import com.lin.mydream.model.Remember;
 import com.lin.mydream.model.Robotx;
+import com.lin.mydream.model.base.BaseModel;
 import com.lin.mydream.service.RememberService;
 import com.lin.mydream.service.dto.MarkdownDingDTO;
 import com.lin.mydream.service.dto.TextDingDTO;
@@ -164,6 +165,8 @@ public class RobotSchedule {
                                             .atMobiles(allReceiver)
                                             .build();
                                     robotx.send(markdownMsg);
+                                    rememberService.notified(notifies.stream().map(BaseModel::getId).collect(Collectors.toList()));
+
                                 }));
 
     }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -146,8 +147,17 @@ public class RememberService {
                         .ge("remember_time", begin)
                         .le("remember_time", end)
                         .eq("remember_type", rType.code())
+                        .eq("is_notified", false)
                 )
         );
+    }
+
+    public boolean notified(Collection<Long> ids) {
+
+        if (CollectionUtils.isEmpty(ids)) {
+            return false;
+        }
+        return rememberManager.update(Wrappers.<Remember>update().set("is_notified", true).in("id", ids));
     }
 }
 

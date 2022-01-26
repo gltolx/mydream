@@ -51,6 +51,11 @@ public class Remember extends BaseModel {
      */
     @TableField("remember_receiver")
     private String receiver;
+    /**
+     * 是否已经接收提醒 默认0
+     */
+    @TableField("is_notified")
+    private boolean notified;
 
     public String toSimpleString() {
         return CommonUtil.format("('{}' '{}' '{}' '{}')"
