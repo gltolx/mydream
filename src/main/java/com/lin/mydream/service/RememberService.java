@@ -108,7 +108,7 @@ public class RememberService {
             Remember remember = new Remember()
                     .setRobotId(ReceivedRobotHolder.id(command.ogt()))
                     .setType(RobotEnum.RememberType.notify.code())
-                    .setName(bodies.get(0) + "_" + cnt)
+                    .setName(bodies.get(0) + "_" + i)
                     .setReceiver(this.obtainReceiver(command))
                     .setRememberTime(theTime);
             notifies.add(remember);
