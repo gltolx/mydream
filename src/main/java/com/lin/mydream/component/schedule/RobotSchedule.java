@@ -1,11 +1,13 @@
 package com.lin.mydream.component.schedule;
 
+import com.google.common.collect.ImmutableList;
 import com.lin.mydream.component.ReceivedRobotHolder;
 import com.lin.mydream.manager.RobotManager;
 import com.lin.mydream.model.Remember;
 import com.lin.mydream.model.Robotx;
 import com.lin.mydream.model.base.BaseModel;
 import com.lin.mydream.service.RememberService;
+import com.lin.mydream.service.dto.BaseDingMsgDTO;
 import com.lin.mydream.service.dto.MarkdownDingDTO;
 import com.lin.mydream.service.dto.TextDingDTO;
 import com.lin.mydream.util.CommonUtil;
@@ -151,24 +153,43 @@ public class RobotSchedule {
                 .forEach((robotId, notifies) ->
                         Optional.ofNullable(robotxMap.get(robotId))
                                 .ifPresent(robotx -> {
-                                    StringBuilder text = new StringBuilder("### 重要提醒\n> 亲爱的，");
                                     notifies.sort(Comparator.comparing(Remember::getRememberTime));
-                                    notifies.forEach(x -> text.append(CommonUtil.format("\n> 「{}」可别忘了哟～", x.getName())));
-                                    String allReceiver = notifies.stream().map(Remember::getReceiver).collect(Collectors.joining(","));
-                                    text.append("\n> 🌟🌟🌟");
 
-                                    MarkdownDingDTO markdownMsg = MarkdownDingDTO
-                                            .builder()
-                                            .title("记忆唤醒【快来看看(*≧ω≦)】")
-                                            .markdownText(text.toString())
-                                            .atAll(false)
-                                            .atMobiles(allReceiver)
-                                            .build();
-                                    robotx.send(markdownMsg);
+                                    BaseDingMsgDTO msgDTO = buildNotifyNormalContent(notifies);
+                                    robotx.send(msgDTO);
                                     rememberService.notified(notifies.stream().map(BaseModel::getId).collect(Collectors.toList()));
 
                                 }));
 
+    }
+
+    private TextDingDTO buildNotifyNormalContent(List<Remember> notifies) {
+        StringBuilder text = new StringBuilder("### 重要提醒\n> 亲爱的，");
+        notifies.forEach(x -> text.append(CommonUtil.format("\n  >「{}」可别忘了哟～", x.getName())));
+        String allReceiver = notifies.stream().map(Remember::getReceiver).collect(Collectors.joining(","));
+        text.append("\n 🌟🌟");
+
+        return TextDingDTO
+                .builder()
+                .content(text.toString())
+                .atAll(false)
+                .mobiles(allReceiver)
+                .build();
+    }
+
+    private MarkdownDingDTO buildNotifyMarkdownContent(List<Remember> notifies) {
+        StringBuilder text = new StringBuilder("### 重要提醒\n> 亲爱的，");
+        notifies.forEach(x -> text.append(CommonUtil.format("\n> 「{}」可别忘了哟～", x.getName())));
+        String allReceiver = notifies.stream().map(Remember::getReceiver).collect(Collectors.joining(","));
+        text.append("\n 🌟🌟");
+
+        return MarkdownDingDTO
+                .builder()
+                .title("记忆唤醒【快来看看(*≧ω≦)】")
+                .markdownText(text.toString())
+                .atAll(false)
+                .atMobiles(allReceiver)
+                .build();
     }
 
     /**

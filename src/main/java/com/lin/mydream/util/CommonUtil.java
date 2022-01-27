@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -26,6 +27,22 @@ import java.util.function.Supplier;
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommonUtil {
+
+    public static void asserts(boolean b, Object param) {
+        if (!b) {
+            throw MydreamException.of("target parameter invalid: {}", param);
+        }
+    }
+
+    public static <T> void asserts(T t, Predicate<T> predicate) {
+        asserts(predicate.test(t), t);
+    }
+
+    public static <T> void asserts(T t, Predicate<T> predicate, String message, Object... formats) {
+        if (!predicate.test(t)) {
+            throw MydreamException.of(message, formats);
+        }
+    }
 
     public static <T> List<T> orEmpty(Supplier<List<T>> supplier) {
         return Optional.ofNullable(supplier)
@@ -98,7 +115,22 @@ public class CommonUtil {
         }
     }
 
-    public static long tryParseLong(String str) {
+    public static Integer tryParseInteger(String str) {
+        return tryParseInteger(str, NumberUtils.INTEGER_ZERO);
+    }
+
+    public static Integer tryParseInteger(String str, Integer def) {
+        if (StringUtils.isEmpty(str)) {
+            return def;
+        }
+        try {
+            return Integer.parseInt(str);
+        } catch (NumberFormatException ignore) {
+        }
+        return def;
+    }
+
+    public static Long tryParseLong(String str) {
         return tryParseLong(str, NumberUtils.LONG_ZERO);
     }
 
@@ -108,7 +140,7 @@ public class CommonUtil {
      * @param str          给定字符串
      * @param defaultValue 默认值
      */
-    public static long tryParseLong(String str, long defaultValue) {
+    public static Long tryParseLong(String str, Long defaultValue) {
         if (StringUtils.isEmpty(str)) {
             return defaultValue;
         }

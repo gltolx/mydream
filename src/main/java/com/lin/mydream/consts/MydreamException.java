@@ -16,7 +16,7 @@ public class MydreamException extends RuntimeException{
     private String message;
     private String code;
 
-    public static MydreamException of(String message, String... format) {
+    public static MydreamException of(String message, Object... format) {
         return new MydreamException("1001", CommonUtil.format(message, format));
     }
 

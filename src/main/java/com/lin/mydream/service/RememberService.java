@@ -1,6 +1,7 @@
 package com.lin.mydream.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.google.common.base.Splitter;
 import com.lin.mydream.component.ReceivedRobotHolder;
 import com.lin.mydream.consts.MydreamException;
 import com.lin.mydream.manager.RememberManager;
@@ -16,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -82,6 +84,44 @@ public class RememberService {
     }
 
     /**
+     * create loop notify - 'publish task' '10/5' '17826833386'
+     * 创建循环提醒 - 'publish task' '每隔10分钟/提醒5次' '@对象17826833386'
+     */
+    public boolean createLoopNotify(Command command) {
+        List<String> bodies = command.extractKeysFromBody();
+        CommonUtil.asserts(bodies.size(), size -> size == 3, "invalid command [{}], please complete it like ```create loop notify - 'publish task' '10/5' '178xxxx3386'```", command.body());
+
+        String name = bodies.get(0);
+        String control = bodies.get(1);
+        String receiver = bodies.get(2);
+
+
+        List<String> ctrls = Splitter.on("/").omitEmptyStrings().trimResults().splitToList(control);
+        CommonUtil.asserts(ctrls.size(), s -> s == 2);
+        int min = CommonUtil.tryParseInteger(ctrls.get(0));
+        int cnt = CommonUtil.tryParseInteger(ctrls.get(1));
+        CommonUtil.asserts(min != 0 && cnt != 0, control);
+        Date now = new Date();
+        List<Remember> notifies = new LinkedList<>();
+        for (long i = 1; i <= cnt; i++) {
+            Date theTime = DateUtils.addMinutes(now, min * cnt);
+
+            Remember remember = new Remember()
+                    .setRobotId(ReceivedRobotHolder.id(command.ogt()))
+                    .setType(RobotEnum.RememberType.notify.code())
+                    .setName(name + "_" + cnt)
+                    .setReceiver(receiver)
+                    .setRememberTime(theTime);
+            notifies.add(remember);
+        }
+        if (!notifies.isEmpty()) {
+            rememberManager.saveBatch(notifies);
+        }
+        return true;
+
+    }
+
+    /**
      * create remember/notify - 'fell in love with LMY' '2021-02-14' '17826833386,13639853155';
      * <p>
      * 创建记忆
@@ -90,6 +130,7 @@ public class RememberService {
         Long robotId = ReceivedRobotHolder.id(command.ogt());
 
         List<String> list = command.extractKeysFromBody();
+
         if (list.size() < 2) {
             throw MydreamException.of("invalid command [{}], maybe should complete the remember name or time like [create remember 'xxx' '2021-02-14 10:00:00']", command.body());
         }
