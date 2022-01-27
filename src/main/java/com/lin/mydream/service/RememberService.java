@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.base.Splitter;
 import com.lin.mydream.component.ReceivedRobotHolder;
 import com.lin.mydream.consts.MydreamException;
+import com.lin.mydream.manager.DingPhoneRelManager;
 import com.lin.mydream.manager.RememberManager;
 import com.lin.mydream.model.Remember;
 import com.lin.mydream.model.enumerate.RobotEnum;
@@ -33,6 +34,8 @@ public class RememberService {
 
     @Autowired
     private RememberManager rememberManager;
+    @Autowired
+    private DingPhoneRelManager dingPhoneRelManager;
 
     /**
      * wake up remembers;
@@ -88,13 +91,9 @@ public class RememberService {
      * 创建循环提醒 - 'publish task' '每隔10分钟/提醒5次' '@对象17826833386'
      */
     public boolean createLoopNotify(Command command) {
-        List<String> bodies = command.extractKeysFromBody();
-        CommonUtil.asserts(bodies.size(), size -> size == 3, "invalid command [{}], please complete it like ```create loop notify - 'publish task' '10/5' '178xxxx3386'```", command.body());
-
-        String name = bodies.get(0);
+        List<String> bodies = command.getBodies();
+        CommonUtil.asserts(bodies.size(), size -> size <= 3, "invalid command [{}], please complete it like ```create loop notify - 'publish task' '10/5' '178xxxx3386'```", command.body());
         String control = bodies.get(1);
-        String receiver = bodies.get(2);
-
 
         List<String> ctrls = Splitter.on("/").omitEmptyStrings().trimResults().splitToList(control);
         CommonUtil.asserts(ctrls.size(), s -> s == 2);
@@ -109,8 +108,8 @@ public class RememberService {
             Remember remember = new Remember()
                     .setRobotId(ReceivedRobotHolder.id(command.ogt()))
                     .setType(RobotEnum.RememberType.notify.code())
-                    .setName(name + "_" + cnt)
-                    .setReceiver(receiver)
+                    .setName(bodies.get(0) + "_" + cnt)
+                    .setReceiver(this.obtainReceiver(command))
                     .setRememberTime(theTime);
             notifies.add(remember);
         }
@@ -121,27 +120,20 @@ public class RememberService {
 
     }
 
+
     /**
      * create remember/notify - 'fell in love with LMY' '2021-02-14' '17826833386,13639853155';
      * <p>
      * 创建记忆
      */
     public boolean createRemember(Command command) {
-        Long robotId = ReceivedRobotHolder.id(command.ogt());
-
-        List<String> list = command.extractKeysFromBody();
-
-        if (list.size() < 2) {
-            throw MydreamException.of("invalid command [{}], maybe should complete the remember name or time like [create remember 'xxx' '2021-02-14 10:00:00']", command.body());
-        }
-        if (list.size() > 3) {
-            throw MydreamException.of("invalid command [{}], only three parameters can be received", command.body());
-        }
-
+        List<String> bodies = command.getBodies();
+        CommonUtil.asserts(bodies.size(), s-> s< 2, "invalid command [{}], maybe should complete the remember name or time like [create remember 'xxx' '2021-02-14 10:00:00']", command.body());
+        CommonUtil.asserts(bodies.size(), s-> s> 3, "invalid command [{}], only three parameters can be received", command.body());
 
         RobotEnum.RememberType rememberType = RobotEnum.RememberType.judge(command.head());
         Date rememberTime = null;
-        String theDate = list.get(1);
+        String theDate = bodies.get(1);
         try {
             rememberTime = DateUtils.parseDate(theDate, theDate.length() > 10 ? "yyyy-MM-dd HH:mm:ss" : "yyyy-MM-dd");
         } catch (ParseException e) {
@@ -149,15 +141,28 @@ public class RememberService {
         }
 
         Remember remember = new Remember()
-                .setRobotId(robotId)
+                .setRobotId(command.getRobotId())
                 .setType(rememberType.code())
-                .setName(list.get(0))
+                .setName(bodies.get(0))
                 .setRememberTime(rememberTime);
+        remember.setReceiver(this.obtainReceiver(command));
 
-        if (list.size() == 3) {
-            remember.setReceiver(list.get(2));
-        }
         return rememberManager.save(remember);
+    }
+
+
+    /**
+     * 获取消息/记忆/提醒的接收者手机号
+     */
+    private String obtainReceiver(Command command) {
+        String receiver;
+        if (command.getBodies().size() == 3) {
+            receiver = command.getBodies().get(2);
+        } else {
+            String senderId = command.getMsgContext().getSenderId();
+            receiver = dingPhoneRelManager.phone(senderId);
+        }
+        return receiver;
     }
 
     public List<Remember> findNotifiesByDatesRange(Date begin, Date end) {

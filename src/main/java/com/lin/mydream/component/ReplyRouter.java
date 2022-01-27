@@ -3,6 +3,7 @@ package com.lin.mydream.component;
 import com.lin.mydream.component.helper.TencentChatBotHelper;
 import com.lin.mydream.consts.MydreamException;
 import com.lin.mydream.controller.param.CreateRobotParam;
+import com.lin.mydream.manager.DingPhoneRelManager;
 import com.lin.mydream.model.Robotx;
 import com.lin.mydream.service.RememberService;
 import com.lin.mydream.service.RobotService;
@@ -33,6 +34,8 @@ import java.util.function.Function;
 @Component
 public class ReplyRouter implements InitializingBean {
 
+    @Autowired
+    private DingPhoneRelManager dingPhoneRelManager;
     @Autowired
     private RobotService robotService;
     @Autowired
@@ -74,6 +77,15 @@ public class ReplyRouter implements InitializingBean {
         /////////////////////////////////////////////////////////////////////////
         //                            私人定制
         ////////////////////////////////////////////////////////////////////////
+
+        // ———————————————————— 注册手机号 ———————————————————————
+        // 注册手机号(方便机器人@你) ｜ register phone - '17826833386'
+        CMD_ROUTER.put("register phone", command -> {
+            Command.MsgContext msgContext = command.getMsgContext();
+            String phone = command.getBodies().get(0);
+            dingPhoneRelManager.register(msgContext.getSenderId(), phone);
+            return CommonUtil.format("registered success! my friend～[{}]", msgContext.getSenderNick());
+        });
         // ———————————————————— 记忆 ———————————————————————
         // 列出所有记忆 ｜ list remembers
         CMD_ROUTER.put("list remembers", command -> {
@@ -82,6 +94,11 @@ public class ReplyRouter implements InitializingBean {
                 return "your remembers are empty";
             }
             return CommonUtil.format("your remembers are follows:\n{}", rememberString);
+        });
+        // 创建循环提醒 | create loop notify - 'publish task' '10/5' '17826833386';
+        CMD_ROUTER.put("create loop notify", command -> {
+            rememberService.createLoopNotify(command);
+            return "create success.";
         });
         // 创建记忆 | create remember/notify - 'fell in love with LMY' '2021-02-14' '17826833386,13639853155';
         CMD_ROUTER.put("create remember", command -> {
@@ -104,16 +121,19 @@ public class ReplyRouter implements InitializingBean {
         // TODO
     }
 
-    public void execute(String outgoingToken, String inputContent) {
-        execute(outgoingToken, inputContent, null);
+    public void execute(String outgoingToken, Map<String, Object> ctxMap) {
+        Map<String, String> contentMap = (Map<String, String>) ctxMap.get("text");
+
+        execute(outgoingToken, contentMap.get("content"), null, ctxMap);
     }
 
     /**
      * 接收消息->逻辑处理->回复自定消息模板 (主要是管理者机器人操作时回复)
      *
      * @param inputContent 用户键入的信息
+     * @param ctxMap       requestBody
      */
-    public void execute(String outgoingToken, String inputContent, String markdownTitle) {
+    public void execute(String outgoingToken, String inputContent, String markdownTitle, Map<String, Object> ctxMap) {
         Assert.isTrue(StringUtils.isNotBlank(outgoingToken), "outgoingToken is empty.");
 
         Robotx robotx = ReceivedRobotHolder.pick(outgoingToken);
@@ -129,8 +149,10 @@ public class ReplyRouter implements InitializingBean {
                 // 既然不认识命令那就开启闲聊模式^_^
                 ReplyDTO replyDTO = tencentChatBotHelper.chat(input);
                 robotx.send(replyDTO.getReply());
+                return;
             }
-            Command command = Command.builder().ogt(outgoingToken).head(input).body(pair.getRight()).build();
+            // 构建command
+            Command command = buildCommand(outgoingToken, ctxMap, pair);
             // 执行调用逻辑，返回消息
             String finalReply = fun.apply(command);
             if (markdownTitle == null) {
@@ -145,6 +167,22 @@ public class ReplyRouter implements InitializingBean {
             robotx.send(e.getMessage());
         }
 
+    }
+
+    /**
+     * 构建Command对象
+     */
+    private Command buildCommand(String outgoingToken, Map<String, Object> ctxMap, Pair<String, String> pair) {
+        Command command = Command.builder()
+                .ogt(outgoingToken)
+                .head(pair.getLeft())
+                .body(pair.getRight())
+                .build();
+        command.setBodies(command.extractKeysFromBody());
+        // 消息上下文（包含requestBody）
+        command.newMsgContext(ctxMap);
+        command.setRobotId(ReceivedRobotHolder.id(outgoingToken));
+        return command;
     }
 
 }

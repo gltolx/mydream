@@ -2,9 +2,13 @@ package com.lin.mydream.service.dto;
 
 import com.google.common.base.Splitter;
 import com.lin.mydream.util.CommonUtil;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created on Milky Way Galaxy.
@@ -17,6 +21,7 @@ import java.util.List;
 @Getter
 @Setter
 public class Command {
+
     /**
      * 用户@的群聊机器人，或者指定的单聊机器人的outgoingToken => ogt
      */
@@ -29,6 +34,19 @@ public class Command {
      * 命令体， - 后的内容
      */
     private String body;
+    /**
+     * 命令体数组
+     */
+    private List<String> bodies;
+    /**
+     * 消息上下文
+     */
+    private MsgContext msgContext;
+    /**
+     * 机器人ID
+     */
+    private Long robotId;
+
 
     public String ogt() {
         return getOgt();
@@ -42,6 +60,24 @@ public class Command {
         return getBody();
     }
 
+    public Command newMsgContext(Map<String, Object> ctxMap) {
+        MsgContext c = new MsgContext();
+        if (ctxMap != null) {
+            c.setMsgId((String) ctxMap.get("msgId"));
+            c.setAdmin((Boolean) ctxMap.get("isAdmin"));
+            c.setSessionWebhookExpiredTime((Long) ctxMap.get("sessionWebhookExpiredTime"));
+            c.setCreateAt((Long) ctxMap.get("createAt"));
+            c.setConversationType((Integer) ctxMap.get("conversationType"));
+            c.setConversationTitle((String) ctxMap.get("conversationTitle"));
+            c.setSessionWebhook((String) ctxMap.get("sessionWebhook"));
+            c.setSenderId((String) ctxMap.get("senderId"));
+            c.setSenderNick((String) ctxMap.get("senderNick"));
+        }
+        this.setMsgContext(c);
+        return this;
+    }
+
+
     public List<String> extractKeysFromBody() {
         return CommonUtil.orEmpty(() -> Splitter
                 .on(body.contains("'") ? "'" : "\"")
@@ -50,10 +86,28 @@ public class Command {
                 .splitToList(body));
     }
 
-    public static void main(String[] args) {
-        Command c = Command.builder().head("delete remember").body("like '哭晕' 'ddd'").build();
-        List<String> list = c.extractKeysFromBody();
-
-        System.out.println();
+    ///////////////////////
+    // 消息上下文信息
+    ///////////////////////
+    @Data
+    public static class MsgContext {
+        private String msgId;
+        private boolean admin;
+        private long sessionWebhookExpiredTime;
+        private long createAt;
+        /**
+         * 群类型
+         */
+        private Integer conversationType;
+        /**
+         * 群名
+         */
+        private String conversationTitle;
+        /**
+         * 当前消息会话
+         */
+        private String sessionWebhook;
+        private String senderId;
+        private String senderNick;
     }
 }

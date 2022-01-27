@@ -50,8 +50,7 @@ public class DingController {
         Long timestamp = CommonUtil.tryParseLong(request.getHeader("timestamp"));
         String token = request.getParameter("token");
         log.info("ding channel - header:[timestamp:{}, sign:{}], requestBody:{}, parameter:[token:{}]", timestamp, request.getHeader("sign"), map, token);
-        Map<String, String> contentMap = (Map<String, String>) map.get("text");
-        replyRouter.execute(token, contentMap.get("content"));
+        replyRouter.execute(token, map);
         return "OK~";
     }
 }
