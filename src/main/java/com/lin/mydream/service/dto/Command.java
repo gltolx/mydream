@@ -67,7 +67,7 @@ public class Command {
             c.setAdmin((Boolean) ctxMap.get("isAdmin"));
             c.setSessionWebhookExpiredTime((Long) ctxMap.get("sessionWebhookExpiredTime"));
             c.setCreateAt((Long) ctxMap.get("createAt"));
-            c.setConversationType((Integer) ctxMap.get("conversationType"));
+            c.setConversationType((String) ctxMap.get("conversationType"));
             c.setConversationTitle((String) ctxMap.get("conversationTitle"));
             c.setSessionWebhook((String) ctxMap.get("sessionWebhook"));
             c.setSenderId((String) ctxMap.get("senderId"));
@@ -98,7 +98,7 @@ public class Command {
         /**
          * 群类型
          */
-        private Integer conversationType;
+        private String conversationType;
         /**
          * 群名
          */
