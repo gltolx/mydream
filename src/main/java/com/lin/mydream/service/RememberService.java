@@ -102,8 +102,8 @@ public class RememberService {
         CommonUtil.asserts(min != 0 && cnt != 0, control);
         Date now = new Date();
         List<Remember> notifies = new LinkedList<>();
-        for (long i = 1; i <= cnt; i++) {
-            Date theTime = DateUtils.addMinutes(now, min * cnt);
+        for (int i = 1; i <= cnt; i++) {
+            Date theTime = DateUtils.addMinutes(now, min * i);
 
             Remember remember = new Remember()
                     .setRobotId(ReceivedRobotHolder.id(command.ogt()))
