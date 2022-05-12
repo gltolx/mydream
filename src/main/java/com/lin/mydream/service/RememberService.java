@@ -128,7 +128,7 @@ public class RememberService {
      */
     public boolean createRemember(Command command) {
         List<String> bodies = command.getBodies();
-        CommonUtil.asserts(bodies.size(), s-> s< 2, "invalid command [{}], maybe should complete the remember name or time like [create remember 'xxx' '2021-02-14 10:00:00']", command.body());
+        CommonUtil.asserts(bodies.size(), s-> s< 1, "invalid command [{}], maybe should complete the remember name or time like [create remember - 'xxx' '2021-02-14 10:00:00']", command.body());
         CommonUtil.asserts(bodies.size(), s-> s> 3, "invalid command [{}], only three parameters can be received", command.body());
 
         RobotEnum.RememberType rememberType = RobotEnum.RememberType.judge(command.head());

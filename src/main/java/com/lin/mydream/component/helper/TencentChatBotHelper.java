@@ -1,10 +1,8 @@
 package com.lin.mydream.component.helper;
 
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lin.mydream.service.dto.tencent.ReplyDTO;
 import com.lin.mydream.util.OkHttpUtil;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -16,7 +14,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.TimeZone;
+import java.util.TreeMap;
 
 /**
  * Created on Milky Way Galaxy.

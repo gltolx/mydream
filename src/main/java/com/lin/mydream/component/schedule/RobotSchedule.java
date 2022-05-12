@@ -1,6 +1,5 @@
 package com.lin.mydream.component.schedule;
 
-import com.google.common.collect.ImmutableList;
 import com.lin.mydream.component.ReceivedRobotHolder;
 import com.lin.mydream.manager.RobotManager;
 import com.lin.mydream.model.Remember;
@@ -164,7 +163,7 @@ public class RobotSchedule {
     }
 
     private TextDingDTO buildNotifyNormalContent(List<Remember> notifies) {
-        StringBuilder text = new StringBuilder("### 重要提醒\n> 亲爱的，");
+        StringBuilder text = new StringBuilder("### 重要提醒，亲爱的，");
         notifies.forEach(x -> text.append(CommonUtil.format("\n  >「{}」可别忘了哟～", x.getName())));
         String allReceiver = notifies.stream().map(Remember::getReceiver).collect(Collectors.joining(","));
         text.append("\n 🌟🌟");
