@@ -7,6 +7,7 @@ import com.lin.mydream.manager.RobotManager;
 import com.lin.mydream.model.Robot;
 import com.lin.mydream.model.base.BaseModel;
 import com.lin.mydream.service.dto.Command;
+import com.lin.mydream.service.dto.Reply;
 import com.lin.mydream.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,10 +41,13 @@ public class RobotService {
      *
      * @return 回传一个outgoing token
      */
-    public String getTokenOnPreCreate() {
+    public Reply getTokenOnPreCreate() {
         String outgoingToken = generateToken();
         robotManager.save(Robot.preCreate(outgoingToken));
-        return outgoingToken;
+
+        return Reply.of(CommonUtil.format(
+                "your token is: {}, the token is valid for half an hour, please create robot as soon as possible."
+                , outgoingToken));
     }
 
     /**
@@ -64,19 +68,19 @@ public class RobotService {
         return robotId;
     }
 
-    public String createRobot(Command command) {
+    public Reply createRobot(Command command) {
         CreateRobotParam p = CreateRobotParam.of(command);
         Long newRobotId = this.createByConfirmingToken(p);
         CommonUtil.format("create success, SEQUENCE ID:[{}], enjoy it.");
-        return CommonUtil.format("create success. robot id:{}", String.valueOf(newRobotId));
+        return Reply.of(CommonUtil.format("create success. robot id:{}", String.valueOf(newRobotId)));
     }
 
 
-    public String deleteRobot(Command command) {
+    public Reply deleteRobot(Command command) {
         if (!this.deleteByAccessToken(command.getBody())) {
             this.deleteByOutgoingToken(command.getBody());
         }
-        return CommonUtil.format("delete success, bye~");
+        return Reply.of(CommonUtil.format("delete success, bye~"));
     }
 
     /**

@@ -11,6 +11,7 @@ import com.lin.mydream.service.RobotService;
 import com.lin.mydream.service.TestService;
 import com.lin.mydream.service.dto.Command;
 import com.lin.mydream.service.dto.MarkdownDingDTO;
+import com.lin.mydream.service.dto.Reply;
 import com.lin.mydream.service.dto.tencent.ReplyDTO;
 import com.lin.mydream.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -50,14 +51,14 @@ public class ReplyRouter implements InitializingBean {
     /**
      * 命令路由, command -> Function{Command, bizReply}
      */
-    private final Map<CMD, Function<Command, String>> CMD_ROUTER = new ConcurrentHashMap<>();
+    private final Map<CMD, Function<Command, Reply>> CMD_ROUTER = new ConcurrentHashMap<>();
 
     /**
      * 获取命令所对应的执行方法
      *
      * @return 执行方法
      */
-    private Function<Command, String> acquire(String cmd) {
+    private Function<Command, Reply> acquire(String cmd) {
         CMD c = CMD.of(cmd);
         return CMD_ROUTER.get(c);
     }
@@ -73,9 +74,7 @@ public class ReplyRouter implements InitializingBean {
         //                            操作机器人
         ////////////////////////////////////////////////////////////////////////
         // 创建机器人 ｜ 1.获取一个outgoingToken ｜ acquire token
-        CMD_ROUTER.put(CMD.ACQUIRE_TOKEN, command -> CommonUtil.format(
-                "your token is: {}, the token is valid for half an hour, please create robot as soon as possible."
-                , robotService.getTokenOnPreCreate()));
+        CMD_ROUTER.put(CMD.ACQUIRE_TOKEN, command -> robotService.getTokenOnPreCreate());
 
         // 创建机器人 ｜ 2.创建 ｜ create robot - [ACCESS_TOKEN],[SIGN],[OUTGOING_TOKEN]
         CMD_ROUTER.put(CMD.CREATE_ROBOT, command -> robotService.createRobot(command));
@@ -125,7 +124,7 @@ public class ReplyRouter implements InitializingBean {
     public void execute(String outgoingToken, Map<String, Object> ctxMap) {
         Map<String, String> contentMap = (Map<String, String>) ctxMap.get("text");
 
-        execute(outgoingToken, contentMap.get("content"), null, ctxMap);
+        execute(outgoingToken, contentMap.get("content"), ctxMap);
     }
 
     /**
@@ -134,7 +133,7 @@ public class ReplyRouter implements InitializingBean {
      * @param inputContent 用户键入的信息
      * @param ctxMap       requestBody
      */
-    public void execute(String outgoingToken, String inputContent, String markdownTitle, Map<String, Object> ctxMap) {
+    public void execute(String outgoingToken, String inputContent, Map<String, Object> ctxMap) {
         Assert.isTrue(StringUtils.isNotBlank(outgoingToken), "outgoingToken is empty.");
 
         Robotx robotx = ReceivedRobotHolder.pick(outgoingToken);
@@ -145,7 +144,7 @@ public class ReplyRouter implements InitializingBean {
         try {
             Pair<String, String> pair = CommonUtil.parseCommand(inputContent);
             String input = pair.getLeft(); // 经过一轮校验后的input
-            Function<Command, String> fun = this.acquire(input);
+            Function<Command, Reply> fun = this.acquire(input);
             if (fun == null) {
                 // 既然不认识命令那就开启闲聊模式^_^
                 ReplyDTO replyDTO = tencentChatBotHelper.chat(input);
@@ -155,13 +154,18 @@ public class ReplyRouter implements InitializingBean {
             // 构建command
             Command command = buildCommand(outgoingToken, ctxMap, pair);
             // 执行调用逻辑，返回消息
-            String finalReply = fun.apply(command);
-            if (markdownTitle == null) {
-                robotx.send(finalReply);
-            } else {
+            Reply finalReply = fun.apply(command);
+            if (RobotEnum.MsgType.markdown.equals(finalReply.getMsgType())) {
                 MarkdownDingDTO markdownMsg = MarkdownDingDTO.builder()
-                        .title(markdownTitle).markdownText(inputContent).atAll(Boolean.FALSE).build();
+                        .title(finalReply.getMdTitle())
+                        .markdownText(finalReply.getContent())
+                        .atAll(Boolean.FALSE)
+                        .build();
                 robotx.send(markdownMsg);
+            } else if (RobotEnum.MsgType.link.equals(finalReply.getMsgType())) {
+                // TODO write text-link
+            } else {
+                robotx.send(finalReply.getContent());
             }
         } catch (Exception e) {
             log.error("收发异常 - input:{}, outgoingToken:{}", inputContent, outgoingToken, e);

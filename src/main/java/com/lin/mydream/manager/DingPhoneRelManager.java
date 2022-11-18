@@ -3,6 +3,7 @@ package com.lin.mydream.manager;
 import com.lin.mydream.mapper.DingPhoneRelMapper;
 import com.lin.mydream.model.DingPhoneRel;
 import com.lin.mydream.service.dto.Command;
+import com.lin.mydream.service.dto.Reply;
 import com.lin.mydream.util.CommonUtil;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +18,13 @@ import org.springframework.stereotype.Service;
 public class DingPhoneRelManager extends BaseManager<DingPhoneRelMapper, DingPhoneRel> {
 
 
-    public String register(Command command) {
+    public Reply register(Command command) {
         Command.MsgContext msgContext = command.getMsgContext();
         String phone = command.getBodies().get(0);
         this.register(msgContext.getSenderId(), phone);
-        return CommonUtil.format("registered success! my friend～[{}]", msgContext.getSenderNick());
+        return Reply.of(
+                CommonUtil.format("registered success! my friend～[{}]", msgContext.getSenderNick())
+        );
     }
 
     /**

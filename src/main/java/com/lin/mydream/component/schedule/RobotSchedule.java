@@ -121,17 +121,17 @@ public class RobotSchedule {
                 return;
             }
             LogUtil.info("Open Remembers... robotId:{}, ", robotx.getSelf().getId());
-            StringBuilder text = new StringBuilder("#### 往者谏 来者追\n> 亲爱的，");
+            StringBuilder text = new StringBuilder("## 往者谏，来者追\n---");
             rems.sort(Comparator.comparing(Remember::getRememberTime));
 
             rems.forEach(x -> {
                 long days = CommonUtil.getDistanceOfTwoDate(x.getRememberTime(), now);
                 String diffTime = CommonUtil.transferDays(days);
 
-                text.append(CommonUtil.format(days > 0 ? "\n> 今天是{}{}的日子" : "\n> 距{}还剩{}", x.getName(), diffTime));
+                text.append(CommonUtil.format(days > 0 ? "\n- #### 今天是{}{}的日子" : "\n- #### 距{}还剩{}", x.getName(), diffTime));
             });
             String allReceiver = rems.stream().map(Remember::getReceiver).collect(Collectors.joining(","));
-            text.append("\n> __To discover, to remember, to write a letter to future～__");
+            text.append("\n\n> To discover, remember and write a letter to future~");
             MarkdownDingDTO markdownMsg = MarkdownDingDTO.builder()
                     .title("记忆唤醒").markdownText(text.toString()).atAll(false).atMobiles(allReceiver).build();
             robotx.send(markdownMsg);

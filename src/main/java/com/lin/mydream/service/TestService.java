@@ -5,6 +5,7 @@ import com.lin.mydream.component.schedule.RobotSchedule;
 import com.lin.mydream.model.Robotx;
 import com.lin.mydream.service.dto.Command;
 import com.lin.mydream.service.dto.MarkdownDingDTO;
+import com.lin.mydream.service.dto.Reply;
 import com.lin.mydream.util.LogUtil;
 import com.lin.mydream.util.SpringUtil;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ import java.util.List;
 @Service
 public class TestService {
 
-    public String doTest(Command command) {
+    public Reply doTest(Command command) {
         long startMillis = System.currentTimeMillis();
         LogUtil.info("STARTING do test... command:{}", command.originString());
 
@@ -36,12 +37,12 @@ public class TestService {
                 robotx.send(markdownMsg);
 
             } else {
-                return "invalid command, body size should be 3";
+                return Reply.of("invalid command, body size should be 3");
             }
         }
 
         LogUtil.info("ENDING do test... spent {}ms", System.currentTimeMillis() - startMillis);
-        return "completed test";
+        return Reply.of("completed test");
 
     }
 }

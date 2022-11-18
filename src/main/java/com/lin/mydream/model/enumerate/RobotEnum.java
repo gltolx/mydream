@@ -20,6 +20,25 @@ public class RobotEnum {
 
 
     /**
+     * 回复文本类型
+     */
+    @AllArgsConstructor
+    @Getter
+    public enum MsgType implements BaseEnum<String> {
+        /**
+         * markdown，link，text
+         */
+        markdown("markdown", "md格式"),
+        link("link", "链接"),
+        text("text", "纯文本"),
+        ;
+
+        private final String code;
+        private final String name;
+    }
+
+
+    /**
      * 操作命令枚举
      */
     @AllArgsConstructor

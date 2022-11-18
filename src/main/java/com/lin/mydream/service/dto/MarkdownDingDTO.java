@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -61,8 +62,7 @@ public class MarkdownDingDTO extends BaseDingMsgDTO{
     public MarkdownDingDTO(String title, String markdownText, Boolean atAll, String atMobiles) {
         super.setMsgtype("markdown");
         this.markdown = ImmutableMap.of("title", title, "text", markdownText);
-
-        List<String> mobileList = Splitter.on(",").omitEmptyStrings().splitToList(atMobiles);
+        List<String> mobileList = Splitter.on(",").omitEmptyStrings().splitToList(StringUtils.trimToEmpty(atMobiles));
         this.at = ImmutableMap.of("isAtAll", BooleanUtils.isTrue(atAll), "atMobiles", mobileList);
     }
 }

@@ -9,6 +9,7 @@ import com.lin.mydream.manager.RememberManager;
 import com.lin.mydream.model.Remember;
 import com.lin.mydream.model.enumerate.RobotEnum;
 import com.lin.mydream.service.dto.Command;
+import com.lin.mydream.service.dto.Reply;
 import com.lin.mydream.util.CommonUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -40,20 +41,21 @@ public class RememberService {
      * wake up remembers;
      * 唤醒记忆
      */
-    public String wakeupRemember(Command command) {
+    public Reply wakeupRemember(Command command) {
         Long robotId = ReceivedRobotHolder.id(command.ogt());
         List<Remember> remembers = rememberManager.listByRobotId(robotId, RobotEnum.RememberType.remember.code());
         Date now = new Date();
-        StringBuilder sb = new StringBuilder("##### 因为记忆，爱才弥足珍贵 —— ");
+        StringBuilder sb = new StringBuilder("### 因为记忆，爱才弥足珍贵 —— ");
         remembers.forEach(x -> {
             long days = CommonUtil.getDistanceOfTwoDate(x.getRememberTime(), now);
             String diffTime = CommonUtil.transferDays(days);
 
             // TODO 未来记忆的文案
-            sb.append(CommonUtil.format(days > 0 ? "\n> 距{}已经{}了" : "\n> 距{}还剩{}", x.getName(), diffTime));
+            sb.append(CommonUtil.format(days > 0 ? "\n- #### 距{}已经{}了" : "\n- #### 距{}还剩{}", x.getName(), diffTime));
         });
 
-        return sb.toString();
+        return Reply.of(sb.toString(), RobotEnum.MsgType.markdown)
+                .setMdTitle("wakeup remembers");
     }
 
     /**
@@ -71,19 +73,21 @@ public class RememberService {
 
     }
 
-    public String listRemembers(Command command) {
+    public Reply listRemembers(Command command) {
         String rememberString = this.listRemember(command);
         if (StringUtils.isBlank(rememberString)) {
-            return "your remembers are empty";
+            return Reply.of("your remembers are empty");
         }
-        return CommonUtil.format("your remembers are follows:\n{}", rememberString);
+        return Reply.of(
+                CommonUtil.format("your remembers are follows:\n{}", rememberString)
+        );
     }
 
     /**
      * delete remember - like 'love';
      * 删除一个记忆
      */
-    public String deleteRemember(Command command) {
+    public Reply deleteRemember(Command command) {
         Long robotId = ReceivedRobotHolder.id(command.ogt());
 
         List<String> list = command.extractKeysFromBody();
@@ -92,14 +96,14 @@ public class RememberService {
         }
 
         rememberManager.deleteLike(robotId, list.get(list.size() - 1));
-        return "delete success";
+        return Reply.of("delete success");
     }
 
     /**
      * create loop notify - 'publish task' '10/5' '17826833386'
      * 创建循环提醒 - 'publish task' '每隔10分钟/提醒5次' '@对象17826833386'
      */
-    public String createLoopNotify(Command command) {
+    public Reply createLoopNotify(Command command) {
         List<String> bodies = command.getBodies();
         CommonUtil.asserts(bodies.size(), size -> size <= 3, "invalid command [{}], please complete it like ```create loop notify - 'publish task' '10/5' '178xxxx3386'```", command.body());
         String control = bodies.get(1);
@@ -125,7 +129,7 @@ public class RememberService {
         if (!notifies.isEmpty()) {
             rememberManager.saveBatch(notifies);
         }
-        return "create success";
+        return Reply.of("create success");
 
     }
 
@@ -135,7 +139,7 @@ public class RememberService {
      * <p>
      * 创建记忆
      */
-    public String createRemember(Command command, RobotEnum.RememberType rememberType) {
+    public Reply createRemember(Command command, RobotEnum.RememberType rememberType) {
         List<String> bodies = command.getBodies();
         CommonUtil.negative(bodies.size(), s -> s < 1, "invalid command [{}], maybe should complete the remember name or time like [create remember - 'xxx' '2021-02-14 10:00:00']", command.body());
         CommonUtil.negative(bodies.size(), s -> s > 3, "invalid command [{}], only three parameters can be received", command.body());
@@ -157,7 +161,7 @@ public class RememberService {
         remember.setReceiver(this.obtainReceiver(command));
 
         rememberManager.save(remember);
-        return "create success";
+        return Reply.of("create success");
     }
 
 
