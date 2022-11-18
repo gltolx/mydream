@@ -44,3 +44,5 @@ CREATE TABLE `my_ding_phone_rel`
     UNIQUE KEY (`ding_id`),
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='钉id和个人手机号绑定表';
+
+ALTER TABLE `my_remember` add column rem_time_str varchar(16) comment '事件时间字符串yyyy-MM-dd';
