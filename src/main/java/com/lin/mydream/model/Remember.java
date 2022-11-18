@@ -41,6 +41,13 @@ public class Remember extends BaseModel {
      */
     @TableField("remember_time")
     private Date rememberTime;
+
+    /**
+     * 事件事件 字符串yyyy-MM-dd
+     */
+    @TableField("rem_time_str")
+    private String remTimeStr;
+
     /**
      * 记忆类型 0-日历模式 1-提醒模式
      */

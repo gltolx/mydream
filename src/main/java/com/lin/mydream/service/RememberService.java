@@ -11,16 +11,14 @@ import com.lin.mydream.model.enumerate.RobotEnum;
 import com.lin.mydream.service.dto.Command;
 import com.lin.mydream.util.CommonUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -183,16 +181,19 @@ public class RememberService {
     }
 
     public List<Remember> findRemembersByDatesIn(List<Date> dates) {
-
-        return findByDatesIn(dates, RobotEnum.RememberType.remember);
+        if (CollectionUtils.isEmpty(dates)) {
+            return Collections.emptyList();
+        }
+        List<String> dateStrList = dates.stream().map(x -> DateFormatUtils.format(x, "yyyy-MM-dd")).collect(Collectors.toList());
+        return findByDatesIn(dateStrList, RobotEnum.RememberType.remember);
     }
 
 
-    public List<Remember> findByDatesIn(List<Date> dates, RobotEnum.RememberType rType) {
+    public List<Remember> findByDatesIn(List<String> dates, RobotEnum.RememberType rType) {
 
         return CommonUtil.orEmpty(() ->
                 rememberManager.list(Wrappers.<Remember>query()
-                        .in("remember_time", dates)
+                        .in("rem_time_str", dates)
                         .eq("remember_type", rType.code())
                 )
         );

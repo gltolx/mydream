@@ -58,7 +58,8 @@ public class RobotEnum {
             if (Objects.isNull(cmd)) {
                 return CMD.NULL;
             }
-            return CommonUtil.or(() -> DIALECT_CMD.get(cmd), CMD.NULL);
+            return CommonUtil.or(() ->
+                    DIALECT_CMD.getOrDefault(cmd, RobotEnum.of(cmd, CMD.class)), CMD.NULL);
         }
 
         /**
@@ -126,7 +127,8 @@ public class RobotEnum {
             DIALECT_CMD.put("aot", CMD.ACQUIRE_TOKEN);
             DIALECT_CMD.put("acq tok", CMD.ACQUIRE_TOKEN);
             DIALECT_CMD.put("acquire outgoing token", CMD.ACQUIRE_TOKEN);
-
+            // 在线测试
+            DIALECT_CMD.put(CMD.TEST.code(), CMD.TEST);
 
         }
 
