@@ -10,6 +10,7 @@ import com.lin.mydream.model.Remember;
 import com.lin.mydream.model.enumerate.RobotEnum;
 import com.lin.mydream.service.dto.Command;
 import com.lin.mydream.util.CommonUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,7 @@ public class RememberService {
      */
     public String wakeupRemember(Command command) {
         Long robotId = ReceivedRobotHolder.id(command.ogt());
-        List<Remember> remembers = rememberManager.listByRobotId(robotId);
+        List<Remember> remembers = rememberManager.listByRobotId(robotId, RobotEnum.RememberType.remember.code());
         Date now = new Date();
         StringBuilder sb = new StringBuilder("##### 因为记忆，爱才弥足珍贵 —— ");
         remembers.forEach(x -> {
@@ -64,18 +65,27 @@ public class RememberService {
     public String listRemember(Command command) {
         Long robotId = ReceivedRobotHolder.id(command.ogt());
 
-        return CommonUtil.orEmpty(() -> rememberManager.listByRobotId(robotId))
+        return CommonUtil
+                .orEmpty(() -> rememberManager.listByRobotId(robotId, RobotEnum.RememberType.remember.code()))
                 .stream()
                 .map(Remember::toSimpleString)
                 .collect(Collectors.joining("\n"));
 
     }
 
+    public String listRemembers(Command command) {
+        String rememberString = this.listRemember(command);
+        if (StringUtils.isBlank(rememberString)) {
+            return "your remembers are empty";
+        }
+        return CommonUtil.format("your remembers are follows:\n{}", rememberString);
+    }
+
     /**
      * delete remember - like 'love';
      * 删除一个记忆
      */
-    public boolean deleteRemember(Command command) {
+    public String deleteRemember(Command command) {
         Long robotId = ReceivedRobotHolder.id(command.ogt());
 
         List<String> list = command.extractKeysFromBody();
@@ -83,14 +93,15 @@ public class RememberService {
             throw MydreamException.of("command invalid [{}], please input like 'delete remember - like \"love\"'", command.body());
         }
 
-        return rememberManager.deleteLike(robotId, list.get(list.size() - 1));
+        rememberManager.deleteLike(robotId, list.get(list.size() - 1));
+        return "delete success";
     }
 
     /**
      * create loop notify - 'publish task' '10/5' '17826833386'
      * 创建循环提醒 - 'publish task' '每隔10分钟/提醒5次' '@对象17826833386'
      */
-    public boolean createLoopNotify(Command command) {
+    public String createLoopNotify(Command command) {
         List<String> bodies = command.getBodies();
         CommonUtil.asserts(bodies.size(), size -> size <= 3, "invalid command [{}], please complete it like ```create loop notify - 'publish task' '10/5' '178xxxx3386'```", command.body());
         String control = bodies.get(1);
@@ -116,7 +127,7 @@ public class RememberService {
         if (!notifies.isEmpty()) {
             rememberManager.saveBatch(notifies);
         }
-        return true;
+        return "create success";
 
     }
 
@@ -126,12 +137,12 @@ public class RememberService {
      * <p>
      * 创建记忆
      */
-    public boolean createRemember(Command command) {
+    public String createRemember(Command command, RobotEnum.RememberType rememberType) {
         List<String> bodies = command.getBodies();
-        CommonUtil.asserts(bodies.size(), s-> s< 1, "invalid command [{}], maybe should complete the remember name or time like [create remember - 'xxx' '2021-02-14 10:00:00']", command.body());
-        CommonUtil.asserts(bodies.size(), s-> s> 3, "invalid command [{}], only three parameters can be received", command.body());
+        CommonUtil.negative(bodies.size(), s -> s < 1, "invalid command [{}], maybe should complete the remember name or time like [create remember - 'xxx' '2021-02-14 10:00:00']", command.body());
+        CommonUtil.negative(bodies.size(), s -> s > 3, "invalid command [{}], only three parameters can be received", command.body());
 
-        RobotEnum.RememberType rememberType = RobotEnum.RememberType.judge(command.head());
+//        RobotEnum.RememberType rememberType = RobotEnum.RememberType.judge(command.head());
         Date rememberTime = null;
         String theDate = bodies.get(1);
         try {
@@ -147,7 +158,8 @@ public class RememberService {
                 .setRememberTime(rememberTime);
         remember.setReceiver(this.obtainReceiver(command));
 
-        return rememberManager.save(remember);
+        rememberManager.save(remember);
+        return "create success";
     }
 
 

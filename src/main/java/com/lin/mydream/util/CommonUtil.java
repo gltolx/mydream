@@ -38,11 +38,25 @@ public class CommonUtil {
         asserts(predicate.test(t), t);
     }
 
+    /**
+     * 断言
+     */
     public static <T> void asserts(T t, Predicate<T> predicate, String message, Object... formats) {
         if (!predicate.test(t)) {
             throw MydreamException.of(message, formats);
         }
     }
+
+    /**
+     * 否定
+     */
+    public static <T> void negative(T t, Predicate<T> predicate, String message, Object... formats) {
+        if (predicate.test(t)) {
+            throw MydreamException.of(message, formats);
+        }
+    }
+
+
 
     public static <T> List<T> orEmpty(Supplier<List<T>> supplier) {
         return Optional.ofNullable(supplier)
@@ -62,6 +76,11 @@ public class CommonUtil {
                 .orElse(null);
     }
 
+    public static <T> T or(Supplier<T> supplier, T defaultVal) {
+        return Optional.ofNullable(supplier)
+                .map(Supplier::get)
+                .orElse(defaultVal);
+    }
     /**
      * format占位替换，{} -> param
      */
@@ -152,7 +171,7 @@ public class CommonUtil {
     }
 
     public static void main(String[] args) throws ParseException {
-        Pair<String, String> pair = parseCommand(" fky");
+        Pair<String, String> pair = parseCommand("create remember - 'feY测试' '2022-02-14' '17826833386,13639853155'");
         System.out.println();
     }
 

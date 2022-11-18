@@ -47,6 +47,10 @@ public class Command {
      */
     private Long robotId;
 
+    public String originString() {
+        return CommonUtil.format("{} - {}", head, body);
+    }
+
 
     public String ogt() {
         return getOgt();
@@ -84,6 +88,13 @@ public class Command {
                 .omitEmptyStrings()
                 .trimResults()
                 .splitToList(body));
+    }
+
+    public static void main(String[] args) {
+        Command command = Command.builder().build();
+        command.setBody("'feY测试' '2022-02-14' '17826833386,13639853155'");
+        List<String> strings = command.extractKeysFromBody();
+        System.out.println(strings);
     }
 
     ///////////////////////

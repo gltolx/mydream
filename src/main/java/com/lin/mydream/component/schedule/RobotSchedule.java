@@ -10,6 +10,8 @@ import com.lin.mydream.service.dto.BaseDingMsgDTO;
 import com.lin.mydream.service.dto.MarkdownDingDTO;
 import com.lin.mydream.service.dto.TextDingDTO;
 import com.lin.mydream.util.CommonUtil;
+import com.lin.mydream.util.LogUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
  * @author <a href="mailto:linfeng.gdlk@gmail.com">Lin Xiao</a> 2021/11/10.
  * @desc 机器人固有的定时任务
  */
+@Slf4j
 @Component
 public class RobotSchedule {
 
@@ -68,7 +71,7 @@ public class RobotSchedule {
 
     @Scheduled(cron = "0 30 9 * * ?")
     public void remember() {
-
+        LogUtil.info("Open Remembers...");
         // 21天、99天、180天、n周年
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR, 0);
@@ -117,7 +120,8 @@ public class RobotSchedule {
             if (robotx == null) {
                 return;
             }
-            StringBuilder text = new StringBuilder("#### 回首山河已是秋，再落风花月对酒\n> 亲爱的，");
+            LogUtil.info("Open Remembers... robotId:{}, ", robotx.getSelf().getId());
+            StringBuilder text = new StringBuilder("#### 往者谏 来者追\n> 亲爱的，");
             rems.sort(Comparator.comparing(Remember::getRememberTime));
 
             rems.forEach(x -> {
@@ -127,7 +131,7 @@ public class RobotSchedule {
                 text.append(CommonUtil.format(days > 0 ? "\n> 今天是{}{}的日子" : "\n> 距{}还剩{}", x.getName(), diffTime));
             });
             String allReceiver = rems.stream().map(Remember::getReceiver).collect(Collectors.joining(","));
-            text.append("\n> __去发现，去纪念，去写一封信给未来的自己吧～__");
+            text.append("\n> __To discover, to remember, to write a letter to future～__");
             MarkdownDingDTO markdownMsg = MarkdownDingDTO.builder()
                     .title("记忆唤醒").markdownText(text.toString()).atAll(false).atMobiles(allReceiver).build();
             robotx.send(markdownMsg);
@@ -163,10 +167,9 @@ public class RobotSchedule {
     }
 
     private TextDingDTO buildNotifyNormalContent(List<Remember> notifies) {
-        StringBuilder text = new StringBuilder("### 重要提醒，亲爱的，");
-        notifies.forEach(x -> text.append(CommonUtil.format("\n  >「{}」可别忘了哟～", x.getName())));
+        StringBuilder text = new StringBuilder("### 🌟重要提醒");
+        notifies.forEach(x -> text.append(CommonUtil.format("\n>【{}】", x.getName())));
         String allReceiver = notifies.stream().map(Remember::getReceiver).collect(Collectors.joining(","));
-        text.append("\n 🌟🌟");
 
         return TextDingDTO
                 .builder()
@@ -177,10 +180,9 @@ public class RobotSchedule {
     }
 
     private MarkdownDingDTO buildNotifyMarkdownContent(List<Remember> notifies) {
-        StringBuilder text = new StringBuilder("### 重要提醒\n> 亲爱的，");
-        notifies.forEach(x -> text.append(CommonUtil.format("\n> 「{}」可别忘了哟～", x.getName())));
+        StringBuilder text = new StringBuilder("### 🌟重要提醒");
+        notifies.forEach(x -> text.append(CommonUtil.format("\n> 【{}】", x.getName())));
         String allReceiver = notifies.stream().map(Remember::getReceiver).collect(Collectors.joining(","));
-        text.append("\n 🌟🌟");
 
         return MarkdownDingDTO
                 .builder()

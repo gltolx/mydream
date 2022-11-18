@@ -6,6 +6,8 @@ import com.lin.mydream.controller.param.CreateRobotParam;
 import com.lin.mydream.manager.RobotManager;
 import com.lin.mydream.model.Robot;
 import com.lin.mydream.model.base.BaseModel;
+import com.lin.mydream.service.dto.Command;
+import com.lin.mydream.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,6 +62,21 @@ public class RobotService {
         // 在pussyPicker里put一个机器人
         ReceivedRobotHolder.put(robotManager.getById(robotId));
         return robotId;
+    }
+
+    public String createRobot(Command command) {
+        CreateRobotParam p = CreateRobotParam.of(command);
+        Long newRobotId = this.createByConfirmingToken(p);
+        CommonUtil.format("create success, SEQUENCE ID:[{}], enjoy it.");
+        return CommonUtil.format("create success. robot id:{}", String.valueOf(newRobotId));
+    }
+
+
+    public String deleteRobot(Command command) {
+        if (!this.deleteByAccessToken(command.getBody())) {
+            this.deleteByOutgoingToken(command.getBody());
+        }
+        return CommonUtil.format("delete success, bye~");
     }
 
     /**

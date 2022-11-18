@@ -24,9 +24,15 @@ public class RememberManager extends BaseManager<RememberMapper, Remember> {
         return this.list(
                 qw().eq("robot_id", robotId)
         );
-//        return this.lambdaQuery()
-//                .eq(x -> x.getRobotId(), robotId)
-//                .list();
+    }
+
+    public List<Remember> listByRobotId(Long robotId, Integer remType) {
+        Objects.requireNonNull(robotId);
+        Objects.requireNonNull(remType);
+
+        return this.list(
+                qw().eq("robot_id", robotId).eq("remember_type", remType)
+        );
     }
 
     public boolean deleteLike(Long robotId, String name) {
