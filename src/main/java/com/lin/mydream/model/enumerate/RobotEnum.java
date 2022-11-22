@@ -51,11 +51,13 @@ public class RobotEnum {
         CREATE_NOTIFY("create notify", "创建提醒"),
         CREATE_LOOP_NOTIFY("create loop notify", "创建循环提醒"),
         LIST_REMEMBERS("list remembers", "列出记忆"),
+        LIST_NOTIFIES("list notifies", "列出提醒"),
         REGISTER_PHONE("register phone", "注册手机号"),
         DELETE_ROBOT("delete robot", "删除机器人"),
         CREATE_ROBOT("create robot", "创建机器人"),
         ACQUIRE_TOKEN("acquire token", "获取令牌"),
         TEST("test", "在线测试"),
+        HELP("help", "获取帮助文档"),
         NULL("NULL", "空指令（错误指令）"),
         ;
         /**
@@ -87,6 +89,8 @@ public class RobotEnum {
         private static void initDialectCmd() {
             // 唤醒记忆
             DIALECT_CMD.put(CMD.WAKE_UP.code(), CMD.WAKE_UP);
+            DIALECT_CMD.put("wu", CMD.WAKE_UP);
+            DIALECT_CMD.put("wur", CMD.WAKE_UP);
             DIALECT_CMD.put("wakeup", CMD.WAKE_UP);
             DIALECT_CMD.put("wkup", CMD.WAKE_UP);
             DIALECT_CMD.put("wake up remember", CMD.WAKE_UP);
@@ -128,7 +132,7 @@ public class RobotEnum {
             DIALECT_CMD.put(CMD.REGISTER_PHONE.code(), CMD.REGISTER_PHONE);
             DIALECT_CMD.put("reg phone", CMD.REGISTER_PHONE);
             DIALECT_CMD.put("rp", CMD.REGISTER_PHONE);
-            DIALECT_CMD.put("注册手机号", CMD.REGISTER_PHONE);
+            DIALECT_CMD.put("注册手机", CMD.REGISTER_PHONE);
             // 删除机器人
             DIALECT_CMD.put(CMD.DELETE_ROBOT.code(), CMD.DELETE_ROBOT);
             DIALECT_CMD.put("del rob", CMD.DELETE_ROBOT);

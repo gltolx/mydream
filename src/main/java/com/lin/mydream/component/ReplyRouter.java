@@ -8,7 +8,7 @@ import com.lin.mydream.model.enumerate.RobotEnum;
 import com.lin.mydream.model.enumerate.RobotEnum.CMD;
 import com.lin.mydream.service.RememberService;
 import com.lin.mydream.service.RobotService;
-import com.lin.mydream.service.TestService;
+import com.lin.mydream.service.TestHelpService;
 import com.lin.mydream.service.dto.Command;
 import com.lin.mydream.service.dto.MarkdownDingDTO;
 import com.lin.mydream.service.dto.Reply;
@@ -45,7 +45,7 @@ public class ReplyRouter implements InitializingBean {
     private RememberService rememberService;
 
     @Autowired
-    private TestService testService;
+    private TestHelpService testHelpService;
     @Autowired
     private TencentChatBotHelper tencentChatBotHelper;
     /**
@@ -92,7 +92,9 @@ public class ReplyRouter implements InitializingBean {
 
         // ———————————————————— 记忆/提醒 ———————————————————————
         // 列出所有记忆 ｜ list remembers
-        CMD_ROUTER.put(CMD.LIST_REMEMBERS, command -> rememberService.listRemembers(command));
+        CMD_ROUTER.put(CMD.LIST_REMEMBERS, command -> rememberService.listRemembers(command, RobotEnum.RememberType.remember));
+        // 列出所有提醒 ｜ list notifies
+        CMD_ROUTER.put(CMD.LIST_NOTIFIES, command -> rememberService.listRemembers(command, RobotEnum.RememberType.notify));
         // 创建循环提醒 | create loop notify - 'publish task' '10/5' '17826833386';
         CMD_ROUTER.put(CMD.CREATE_LOOP_NOTIFY, command -> rememberService.createLoopNotify(command));
         // 创建记忆 | create remember - 'fell in love with LMY' '2021-02-14' '17826833386,13639853155';
@@ -109,6 +111,7 @@ public class ReplyRouter implements InitializingBean {
         // ———————————————————— 传话 ———————————————————————
         // TODO
 
+
         /////////////////////////////////////////////////////////////////////////
         //                            在线测试
         ////////////////////////////////////////////////////////////////////////
@@ -117,7 +120,8 @@ public class ReplyRouter implements InitializingBean {
          * 定时任务remember测试 | test - 'schedule::remember'
          * md消息测试 | test - 'msg::markdown' 'markdownTitle...' 'markdownText...'
          */
-        CMD_ROUTER.put(CMD.TEST, command -> testService.doTest(command));
+        CMD_ROUTER.put(CMD.TEST, command -> testHelpService.doTest(command));
+        CMD_ROUTER.put(CMD.HELP, command -> testHelpService.doHelp());
     }
 
 

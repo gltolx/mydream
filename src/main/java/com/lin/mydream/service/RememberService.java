@@ -60,26 +60,26 @@ public class RememberService {
 
     /**
      * list remembers;
-     * 列出所有记忆
+     * 列出所有记忆/提醒
      */
-    public String listRemember(Command command) {
+    public String selectListBy(Command command, RobotEnum.RememberType rememberType) {
         Long robotId = ReceivedRobotHolder.id(command.ogt());
 
         return CommonUtil
-                .orEmpty(() -> rememberManager.listByRobotId(robotId, RobotEnum.RememberType.remember.code()))
+                .orEmpty(() -> rememberManager.listByRobotId(robotId, rememberType.code()))
                 .stream()
                 .map(Remember::toSimpleString)
                 .collect(Collectors.joining("\n"));
 
     }
 
-    public Reply listRemembers(Command command) {
-        String rememberString = this.listRemember(command);
+    public Reply listRemembers(Command command, RobotEnum.RememberType rememberType) {
+        String rememberString = this.selectListBy(command, rememberType);
         if (StringUtils.isBlank(rememberString)) {
-            return Reply.of("your remembers are empty");
+            return Reply.of("there is empty");
         }
         return Reply.of(
-                CommonUtil.format("your remembers are follows:\n{}", rememberString)
+                CommonUtil.format("there are follows:\n{}", rememberString)
         );
     }
 

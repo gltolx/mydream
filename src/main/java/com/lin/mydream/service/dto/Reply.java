@@ -22,6 +22,33 @@ public class Reply {
      */
     private String mdTitle;
 
+    public Reply content(String content) {
+        this.content = content;
+        return this;
+    }
+
+    public Reply msgType(RobotEnum.MsgType msgType) {
+        this.msgType = msgType;
+        return this;
+    }
+
+    public Reply mdTitle(String mdTitle) {
+        this.mdTitle = mdTitle;
+        return this;
+    }
+
+    public String content() {
+        return content;
+    }
+
+    public RobotEnum.MsgType msgType() {
+        return msgType;
+    }
+
+    public String mdTitle() {
+        return mdTitle;
+    }
+
     public static Reply of(String content) {
         return Reply.of(content, null);
     }

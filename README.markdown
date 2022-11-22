@@ -5,7 +5,27 @@
 
 
 ### 打包
-`scp mydream-java.tar.gz root@120.26.126.100:/root/app/`
-password: google密钥
+本地
+```sh
+    mvn clean package -U -DskipTests
+    scp mydream-java.tar.gz root@120.26.126.100:/root/app/
+```
+远程实例
+```sh
+    cd /root/app
+    [先关闭原来服务: jps kill-9/ sh xxx.sh stop]
+    mv mydream-java mydream-java-tmp
+    mkdir -p mydream-java
+    tar -zxvf mydream-java.tar.gz -C mydream-java/
+    ./mydream-java/bin/mydream.sh start
+```
 
 ### Mysql
++ 启动：`service mysqld start`
++ 关闭：`service mysqld stop`
++ 登录：`mysql -u root -p` 密码：[xxxxxx]
++ 初始化：
+```sh
+    mysql> source /root/app/mydream-java/sql/schema_v1.sql
+    mysql> source /root/app/mydream-java/sql/insert_v1.sql
+```
