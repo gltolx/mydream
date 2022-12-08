@@ -35,6 +35,8 @@ public class OkHttpUtil {
                     .readTimeout(60, TimeUnit.SECONDS)      // 设置读超时
                     .writeTimeout(60, TimeUnit.SECONDS)     // 设置写超时
                     .retryOnConnectionFailure(true)                 // 是否自动重连
+                    // 设置连接池 最大连接数4 生命周期7min
+                    .connectionPool(new ConnectionPool(4, 7, TimeUnit.MINUTES))
                     .build();
 
     public static String get(String url) {

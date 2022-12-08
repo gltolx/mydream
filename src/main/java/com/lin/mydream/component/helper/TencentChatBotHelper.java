@@ -1,6 +1,7 @@
 package com.lin.mydream.component.helper;
 
 import com.alibaba.fastjson.JSONObject;
+import com.lin.mydream.consts.Mydreams;
 import com.lin.mydream.service.dto.tencent.ReplyDTO;
 import com.lin.mydream.util.OkHttpUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,6 @@ public class TencentChatBotHelper {
     private final static Charset UTF8 = StandardCharsets.UTF_8;
 //    private final static String SECRET_ID = "AKIDnQmsiHZaMr52jALFsFK8gz1mFSO3SaR2";
 //    private final static String SECRET_KEY = "MRGo55pIUP3RYOxGaeRxCAqFOGrBF1Wl";
-    public final static String CT_JSON = "application/json; charset=utf-8";
     private final static String SIGN_ALGORITHM = "TC3-HMAC-SHA256";
 
     @Value("${tencent.secret-id}")
@@ -57,7 +57,7 @@ public class TencentChatBotHelper {
 
         TreeMap<String, String> headers = new TreeMap<>();
         headers.put("Authorization", authorization);
-        headers.put("Content-Type", CT_JSON);
+        headers.put("Content-Type", Mydreams.CT_JSON);
         headers.put("Host", host);
         headers.put("X-TC-Action", "ChatBot");
         headers.put("X-TC-Timestamp", timestamp);

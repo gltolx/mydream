@@ -10,4 +10,6 @@ package com.lin.mydream.consts;
 public interface Mydreams {
 
     String BASE_API = "md/api/v1/";
+
+    String CT_JSON = "application/json; charset=utf-8";
 }

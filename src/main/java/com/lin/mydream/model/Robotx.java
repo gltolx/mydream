@@ -1,6 +1,7 @@
 package com.lin.mydream.model;
 
 import com.lin.mydream.service.dto.BaseDingMsgDTO;
+import com.lin.mydream.service.dto.MarkdownDingDTO;
 import com.lin.mydream.service.dto.TextDingDTO;
 import com.lin.mydream.util.SignUtil;
 import com.lin.mydream.util.SpringUtil;
@@ -73,6 +74,19 @@ public class Robotx {
                 .content(content)
                 .atAll(false)
                 .mobiles(mobiles).build());
+    }
+
+    public <T extends BaseDingMsgDTO> void sendMd( String mdContent) {
+        sendMd(null, mdContent);
+    }
+
+    public <T extends BaseDingMsgDTO> void sendMd(String title, String mdContent) {
+        MarkdownDingDTO markdownMsg = MarkdownDingDTO.builder()
+                .title(null)
+                .markdownText(mdContent)
+                .atAll(Boolean.FALSE)
+                .build();
+        send(markdownMsg);
     }
 
 

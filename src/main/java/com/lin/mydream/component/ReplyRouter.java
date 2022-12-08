@@ -50,7 +50,6 @@ public class ReplyRouter implements InitializingBean {
     private TestHelpService testHelpService;
     @Autowired
     private TencentChatBotHelper tencentChatBotHelper;
-
     @Autowired
     private ChatGptHelper chatGptHelper;
     /**
@@ -160,12 +159,14 @@ public class ReplyRouter implements InitializingBean {
                 CReplyDTO r = chatGptHelper.davinci(input);
                 if (r.isSuccess()) {
                     reply = r.getContent();
+                    robotx.sendMd(reply);
                 } else {
                     // ChatGPT-AI 调用失败则开启 Tencent 闲聊模式
                     ReplyDTO replyDTO = tencentChatBotHelper.chat(input);
                     reply = replyDTO.getReply();
+                    robotx.send(reply);
                 }
-                robotx.send(reply);
+
                 return;
             }
             // 构建command
@@ -173,12 +174,7 @@ public class ReplyRouter implements InitializingBean {
             // 执行调用逻辑，返回消息
             Reply finalReply = fun.apply(command);
             if (RobotEnum.MsgType.markdown.equals(finalReply.getMsgType())) {
-                MarkdownDingDTO markdownMsg = MarkdownDingDTO.builder()
-                        .title(finalReply.getMdTitle())
-                        .markdownText(finalReply.getContent())
-                        .atAll(Boolean.FALSE)
-                        .build();
-                robotx.send(markdownMsg);
+                robotx.sendMd(finalReply.getMdTitle(), finalReply.getContent());
             } else if (RobotEnum.MsgType.link.equals(finalReply.getMsgType())) {
                 // TODO write text-link
             } else {
