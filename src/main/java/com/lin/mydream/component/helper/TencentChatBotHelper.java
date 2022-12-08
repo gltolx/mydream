@@ -32,7 +32,7 @@ public class TencentChatBotHelper {
     private final static Charset UTF8 = StandardCharsets.UTF_8;
 //    private final static String SECRET_ID = "AKIDnQmsiHZaMr52jALFsFK8gz1mFSO3SaR2";
 //    private final static String SECRET_KEY = "MRGo55pIUP3RYOxGaeRxCAqFOGrBF1Wl";
-    private final static String CT_JSON = "application/json; charset=utf-8";
+    public final static String CT_JSON = "application/json; charset=utf-8";
     private final static String SIGN_ALGORITHM = "TC3-HMAC-SHA256";
 
     @Value("${tencent.secret-id}")

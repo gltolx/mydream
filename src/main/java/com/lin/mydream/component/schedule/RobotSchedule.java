@@ -38,36 +38,36 @@ public class RobotSchedule {
     @Autowired
     private RememberService rememberService;
 
-    @Scheduled(cron = "0 05 10 ? * MON-FRI")
+//    @Scheduled(cron = "0 05 10 ? * MON-FRI")
     public void notifyEnjoyingWork() {
         this.travelAll(robotx -> robotx.send(TextDingDTO.normal("上班啦，专注一下，早点下班！！^-^")));
     }
 
-    @Scheduled(cron = "0 05 15 ? * MON-FRI")
+//    @Scheduled(cron = "0 05 15 ? * MON-FRI")
     public void notifyEnjoyingFishing() {
         this.travelAll(robotx -> robotx.send(TextDingDTO.normal("喝杯茶，解个手，舒缓一下吧")));
     }
 
     @Scheduled(cron = "0 05 18 ? * MON-THU")
     public void notifyEnjoyingLifeMon2Thu() {
-        this.travelAll(robotx -> robotx.send(TextDingDTO.atAll("别卷了，下班吧，少年！！")));
+        this.travelAll(robotx -> robotx.send(TextDingDTO.atAll("报钟：北京时间18点05分")));
     }
 
     @Scheduled(cron = "0 05 18 ? * FRI")
     public void notifyEnjoyingLifeFri() {
-        this.travelAll(robotx -> robotx.send(TextDingDTO.atAll("下班了 ———— ta喜欢你，你喜欢这世界，世界只喜欢今天，因为～今天是周五。")));
+        this.travelAll(robotx -> robotx.send(TextDingDTO.atAll("周五 18:05，懂？")));
     }
 
-    @Scheduled(cron = "0 55 19 ? * MON-THU")
+//    @Scheduled(cron = "0 55 19 ? * MON-THU")
     public void notifyEnjoyingLife2() {
-        this.travelAll(robotx -> robotx.send(TextDingDTO.normal("你不卷我不卷，生活处处是笑脸")));
+        this.travelAll(robotx -> robotx.send(TextDingDTO.normal("别tm卷了，下班吧，少年！！")));
     }
 
 
-//    @Scheduled(cron = "0 0 22 ? * MON-FRI")
-//    public void notifyEnjoyingLife4() {
-//        this.travelAll(robotx -> robotx.send(TextDingDTO.normal("就在这一瞬间，你累了，也倦了")));
-//    }
+    @Scheduled(cron = "0 0 22 ? * MON-FRI")
+    public void notifyEnjoyingLife4() {
+        this.travelAll(robotx -> robotx.send(TextDingDTO.normal("不允许还有人在卷。")));
+    }
 
     @Scheduled(cron = "0 30 9 * * ?")
     public void remember() {

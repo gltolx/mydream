@@ -21,3 +21,8 @@ robot:
 tencent:
   secret-id: AKIDnQmsiHZaMr52jALFsFK8gz1mFSO3SaR2
   secret-key: MRGo55pIUP3RYOxGaeRxCAqFOGrBF1Wl
+
+chat-gpt:
+  api-key: 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
+  max-tokens: 1000
+  temperature: 0.5

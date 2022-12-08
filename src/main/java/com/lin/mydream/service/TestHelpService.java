@@ -19,9 +19,9 @@ public class TestHelpService {
     public static final String HELP_TEXT = "## 初始化机器人\n" +
             "### 规则\n" +
             "\n" +
-            "+ 完整命令__须艾特__机器人，例如：@robot1 后再键入以下命令\n" +
+            "+ 完整命令**须艾特**机器人，例如：@robot1 后再键入以下命令\n" +
             "+ {XXX}，{}表示占位符，XXX表示释义。()表示非必填。\n" +
-            "+ 命令头__均支持简写__以及__中文__。例如：list remembers，简写为`lr`，或中文表示为`列出记忆`\n" +
+            "+ 命令头**均支持简写**以及**中文**。例如：list remembers，简写为`lr`，或中文表示为`列出记忆`\n" +
             "\n" +
             "---\n" +
             "\n" +
@@ -68,7 +68,7 @@ public class TestHelpService {
             "\n" +
             "## 待续……\n" +
             "\n" +
-            "<a href=\"gltolx@163.com\">Click to contact</a>\n" +
+            "contact: gltolx@163.com\n" +
             "\n" +
             "\n" +
             "\n" +

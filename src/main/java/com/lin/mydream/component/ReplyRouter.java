@@ -1,5 +1,6 @@
 package com.lin.mydream.component;
 
+import com.lin.mydream.component.helper.ChatGptHelper;
 import com.lin.mydream.component.helper.TencentChatBotHelper;
 import com.lin.mydream.consts.MydreamException;
 import com.lin.mydream.manager.DingPhoneRelManager;
@@ -12,6 +13,7 @@ import com.lin.mydream.service.TestHelpService;
 import com.lin.mydream.service.dto.Command;
 import com.lin.mydream.service.dto.MarkdownDingDTO;
 import com.lin.mydream.service.dto.Reply;
+import com.lin.mydream.service.dto.chatgpt.CReplyDTO;
 import com.lin.mydream.service.dto.tencent.ReplyDTO;
 import com.lin.mydream.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +50,9 @@ public class ReplyRouter implements InitializingBean {
     private TestHelpService testHelpService;
     @Autowired
     private TencentChatBotHelper tencentChatBotHelper;
+
+    @Autowired
+    private ChatGptHelper chatGptHelper;
     /**
      * 命令路由, command -> Function{Command, bizReply}
      */
@@ -150,9 +155,17 @@ public class ReplyRouter implements InitializingBean {
             String input = pair.getLeft(); // 经过一轮校验后的input
             Function<Command, Reply> fun = this.acquire(input);
             if (fun == null) {
-                // 既然不认识命令那就开启闲聊模式^_^
-                ReplyDTO replyDTO = tencentChatBotHelper.chat(input);
-                robotx.send(replyDTO.getReply());
+                String reply;
+                // 不认识命令则开启 ChatGPT-AI 问答
+                CReplyDTO r = chatGptHelper.davinci(input);
+                if (r.isSuccess()) {
+                    reply = r.getContent();
+                } else {
+                    // ChatGPT-AI 调用失败则开启 Tencent 闲聊模式
+                    ReplyDTO replyDTO = tencentChatBotHelper.chat(input);
+                    reply = replyDTO.getReply();
+                }
+                robotx.send(reply);
                 return;
             }
             // 构建command
