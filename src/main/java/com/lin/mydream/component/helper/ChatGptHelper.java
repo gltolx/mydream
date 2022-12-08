@@ -2,7 +2,6 @@ package com.lin.mydream.component.helper;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.lin.mydream.consts.Mydreams;
 import com.lin.mydream.service.dto.chatgpt.CReplyDTO;
 import com.lin.mydream.util.CommonUtil;
 import com.lin.mydream.util.LogUtil;
@@ -26,8 +25,19 @@ public class ChatGptHelper {
 
     public static final String API_1 = "https://api.openai.com/v1/completions";
 
-    @Value("${chat-gpt.api-key}")
-    private String apiKey;
+    private static String sysApiKey;
+
+    static {
+        try {
+            sysApiKey = System.getenv("OPENAI_API_KEY");
+        } finally {
+            log.info("Load Env Variable [OPENAI_API_KEY], value is:{}", sysApiKey);
+        }
+
+    }
+//    @Value("${chat-gpt.api-key}")
+//    private String apiKey;
+
     @Value("#{T(java.lang.Integer).parseInt('${chat-gpt.max-tokens:1000}')}")
     private Integer maxTokens;
     @Value("#{T(java.lang.Double).parseDouble('${chat-gpt.temperature:0.5}')}")
@@ -52,7 +62,7 @@ public class ChatGptHelper {
         requestBody.put("stream", false);
         String body = requestBody.toJSONString();
         TreeMap<String, String> headers = new TreeMap<>();
-        headers.put("Authorization", "Bearer " + apiKey);
+        headers.put("Authorization", "Bearer " + sysApiKey);
         headers.put("Content-Type", "application/json");
         String result = null;
         try {
@@ -77,8 +87,10 @@ public class ChatGptHelper {
     }
 
     public static void main(String[] args) {
+        String openai_api_key = System.getenv("OPENAI_API_KEY");
+
         ChatGptHelper chatGptHelper = new ChatGptHelper();
-        chatGptHelper.apiKey = "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";
+//        chatGptHelper.apiKey = "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";
         chatGptHelper.maxTokens = 1000;
         chatGptHelper.temperature = 0.5D;
         CReplyDTO content = chatGptHelper.davinci("Say this is a test");

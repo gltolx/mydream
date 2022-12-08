@@ -76,13 +76,13 @@ public class Robotx {
                 .mobiles(mobiles).build());
     }
 
-    public <T extends BaseDingMsgDTO> void sendMd( String mdContent) {
-        sendMd(null, mdContent);
+    public <T extends BaseDingMsgDTO> void sendMd(String mdContent) {
+        sendMd(mdContent.substring(0, 10), mdContent);
     }
 
     public <T extends BaseDingMsgDTO> void sendMd(String title, String mdContent) {
         MarkdownDingDTO markdownMsg = MarkdownDingDTO.builder()
-                .title(null)
+                .title(title)
                 .markdownText(mdContent)
                 .atAll(Boolean.FALSE)
                 .build();

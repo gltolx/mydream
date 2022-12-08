@@ -159,13 +159,12 @@ public class ReplyRouter implements InitializingBean {
                 CReplyDTO r = chatGptHelper.davinci(input);
                 if (r.isSuccess()) {
                     reply = r.getContent();
-                    robotx.sendMd(reply);
                 } else {
                     // ChatGPT-AI 调用失败则开启 Tencent 闲聊模式
                     ReplyDTO replyDTO = tencentChatBotHelper.chat(input);
                     reply = replyDTO.getReply();
-                    robotx.send(reply);
                 }
+                robotx.send(reply);
 
                 return;
             }
