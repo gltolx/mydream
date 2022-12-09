@@ -54,6 +54,8 @@ public class RobotEnum {
         LIST_NOTIFIES("list notifies", "列出提醒"),
         REGISTER_PHONE("register phone", "注册手机号"),
         DELETE_ROBOT("delete robot", "删除机器人"),
+        LIST_ACTIVE_ROBOT("list active", "查询待激活机器人"),
+        ACTIVE_ROBOT("active robot", "激活机器人"),
         CREATE_ROBOT("create robot", "创建机器人"),
         ACQUIRE_TOKEN("acquire token", "获取令牌"),
         TEST("test", "在线测试"),
@@ -138,6 +140,21 @@ public class RobotEnum {
             DIALECT_CMD.put("del rob", CMD.DELETE_ROBOT);
             DIALECT_CMD.put("del robot", CMD.DELETE_ROBOT);
             DIALECT_CMD.put("删除机器人", CMD.DELETE_ROBOT);
+
+            // 查询待激活机器人
+            DIALECT_CMD.put(CMD.LIST_ACTIVE_ROBOT.code(), CMD.LIST_ACTIVE_ROBOT);
+            DIALECT_CMD.put("la", CMD.LIST_ACTIVE_ROBOT);
+            DIALECT_CMD.put("list active", CMD.LIST_ACTIVE_ROBOT);
+            DIALECT_CMD.put("show active", CMD.LIST_ACTIVE_ROBOT);
+            DIALECT_CMD.put("查询待激活机器人", CMD.LIST_ACTIVE_ROBOT);
+            DIALECT_CMD.put("待激活", CMD.LIST_ACTIVE_ROBOT);
+
+            // 激活机器人
+            DIALECT_CMD.put(CMD.ACTIVE_ROBOT.code(), CMD.ACTIVE_ROBOT);
+            DIALECT_CMD.put("ar", CMD.ACTIVE_ROBOT);
+            DIALECT_CMD.put("active", CMD.ACTIVE_ROBOT);
+            DIALECT_CMD.put("激活机器人", CMD.ACTIVE_ROBOT);
+            DIALECT_CMD.put("激活", CMD.ACTIVE_ROBOT);
             // 创建机器人
             DIALECT_CMD.put(CMD.CREATE_ROBOT.code(), CMD.CREATE_ROBOT);
             DIALECT_CMD.put("create rob", CMD.CREATE_ROBOT);
@@ -167,7 +184,7 @@ public class RobotEnum {
     @Getter
     public enum Stat implements BaseEnum<Integer> {
         valid(1, "正常"),
-        initial(0, "初始化"),
+        initial(0, "待激活"),
         invalid(-1, "失效"),
         ;
 

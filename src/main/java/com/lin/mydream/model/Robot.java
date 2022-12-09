@@ -3,13 +3,16 @@ package com.lin.mydream.model;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.google.common.base.Splitter;
+import com.lin.mydream.consts.Mydreams;
 import com.lin.mydream.model.base.BaseModel;
 import com.lin.mydream.model.enumerate.RobotEnum;
+import com.lin.mydream.util.CommonUtil;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -100,6 +103,20 @@ public class Robot extends BaseModel {
         return isOutgoingEnable() && StringUtils.isNotEmpty(getOutgoingToken());
     }
 
+    /**
+     * 是否为正常（已激活）的状态
+     */
+    public boolean isValid() {
+        return RobotEnum.Stat.valid.equalsCode(this.getStat());
+    }
+
+    public String getStatDesc() {
+        RobotEnum.Stat st = RobotEnum.of(getStat(), RobotEnum.Stat.class);
+        if (st == null) {
+            return "无状态(状态缺失)";
+        }
+        return st.getName();
+    }
 
     public static Robot preCreate(String token) {
         Robot entity = new Robot();
@@ -112,5 +129,15 @@ public class Robot extends BaseModel {
         entity.setUpdateTime(new Date());
 //        entity.setName("0");
         return entity;
+    }
+
+    public String toSimpleString() {
+
+        return CommonUtil.format("+ SEQUENCE:{}, 创建时间:{}, OUTGOING_TOKEN:**{}**, 状态:{}"
+                , getId()
+                , DateFormatUtils.format(getCreateTime(), Mydreams.Y_M_D_H_M_S)
+                , getOutgoingToken()
+                , getStatDesc()
+        );
     }
 }

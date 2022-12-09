@@ -69,6 +69,10 @@ public class Robotx {
         send(TextDingDTO.normal(content));
     }
 
+    public void sendAtAll(String content) {
+        send(TextDingDTO.atAll(content));
+    }
+
     public void sendAt(String content, String mobiles) {
         send(TextDingDTO.builder()
                 .content(content)
@@ -76,11 +80,19 @@ public class Robotx {
                 .mobiles(mobiles).build());
     }
 
+
+    public <T extends BaseDingMsgDTO> void sendMd(String mdContent, Boolean atAll) {
+        sendMd(mdContent.substring(0, 10), mdContent, atAll);
+    }
     public <T extends BaseDingMsgDTO> void sendMd(String mdContent) {
-        sendMd(mdContent.substring(0, 10), mdContent);
+        sendMd(mdContent, false);
     }
 
     public <T extends BaseDingMsgDTO> void sendMd(String title, String mdContent) {
+        sendMd(title, mdContent, false);
+    }
+
+    public <T extends BaseDingMsgDTO> void sendMd(String title, String mdContent, Boolean atAll) {
         MarkdownDingDTO markdownMsg = MarkdownDingDTO.builder()
                 .title(title)
                 .markdownText(mdContent)

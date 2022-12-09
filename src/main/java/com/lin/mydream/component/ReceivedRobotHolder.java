@@ -38,6 +38,10 @@ public class ReceivedRobotHolder implements InitializingBean {
     @Resource
     private RobotManager robotManager;
 
+    public static boolean remove(String outgoingToken) {
+        return pussyPicker.remove(outgoingToken) != null;
+    }
+
     /**
      * 根据outgoingToken识别机器人
      */

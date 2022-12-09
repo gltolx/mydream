@@ -1,6 +1,7 @@
 package com.lin.mydream.component.schedule;
 
 import com.lin.mydream.component.ReceivedRobotHolder;
+import com.lin.mydream.consts.Mydreams;
 import com.lin.mydream.manager.RobotManager;
 import com.lin.mydream.model.Remember;
 import com.lin.mydream.model.Robotx;
@@ -55,7 +56,7 @@ public class RobotSchedule {
 
     @Scheduled(cron = "0 05 18 ? * FRI")
     public void notifyEnjoyingLifeFri() {
-        this.travelAll(robotx -> robotx.send(TextDingDTO.atAll("周五 18:05，懂？")));
+        this.travelAll(robotx -> robotx.send(TextDingDTO.atAll("周五18点05分，懂？")));
     }
 
 //    @Scheduled(cron = "0 55 19 ? * MON-THU")
@@ -66,7 +67,7 @@ public class RobotSchedule {
 
     @Scheduled(cron = "0 0 22 ? * MON-FRI")
     public void notifyEnjoyingLife4() {
-        this.travelAll(robotx -> robotx.send(TextDingDTO.normal("不允许还有人在卷。")));
+        this.travelAll(robotx -> robotx.send(TextDingDTO.normal("不允许有人还在卷。")));
     }
 
     @Scheduled(cron = "0 30 9 * * ?")
@@ -106,7 +107,7 @@ public class RobotSchedule {
         for (int i = 1; i <= 10; i++) { // 10周年以内
             dates.add(DateUtils.addYears(now, -i));
         }
-        List<Remember> remembers = rememberService.findRemembersByDatesIn(dates);
+        List<Remember> remembers = rememberService.findAllRemembersByDatesIn(dates);
         if (CollectionUtils.isEmpty(remembers)) {
             return;
         }
@@ -121,7 +122,7 @@ public class RobotSchedule {
                 return;
             }
             LogUtil.info("Open Remembers... robotId:{}, ", robotx.getSelf().getId());
-            StringBuilder text = new StringBuilder("## 往者谏，来者追\n---");
+            StringBuilder text = new StringBuilder("## " + Mydreams.getZzs() + "\n---");
             rems.sort(Comparator.comparing(Remember::getRememberTime));
 
             rems.forEach(x -> {
@@ -197,11 +198,7 @@ public class RobotSchedule {
      * 遍历所有的机器人并消费
      */
     public void travelAll(Consumer<Robotx> consumer) {
-        robotManager
-                .findValidRobots()
-                .stream()
-                .map(Robotx::new)
-                .forEach(consumer);
+        ReceivedRobotHolder.values().forEach(consumer);
     }
 
 }

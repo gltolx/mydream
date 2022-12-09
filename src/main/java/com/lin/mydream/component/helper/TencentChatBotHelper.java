@@ -100,7 +100,7 @@ public class TencentChatBotHelper {
      * @throws Exception
      */
     private String makeSign(String service, String host, String payload, String timestamp) throws Exception {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat(Mydreams.Y_M_D);
         // 注意时区，否则容易出错
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         String date = sdf.format(new Date(Long.parseLong(timestamp + "000")));

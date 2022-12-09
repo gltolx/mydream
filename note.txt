@@ -1,0 +1,5 @@
+您的token是：1f20f31bd4, 接下来,
+            1. 在机器人管理中绑定POST地址：http://172.16.77.28:8011/md/api/v1/ding/channel?token=1f20f31bd4，绑定Token：1f20f31bd4
+            2.安全设置勾选为加签，分别复制Webhook中的[ACCESS_TOKEN]和加签密钥[SIGN]备用
+2. 再使用命令创建一个机器人：
+    create robot - [ACCESS_TOKEN],[SIGN],[OUTGOING_TOKEN]

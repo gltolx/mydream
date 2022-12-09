@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.base.Splitter;
 import com.lin.mydream.component.ReceivedRobotHolder;
 import com.lin.mydream.consts.MydreamException;
+import com.lin.mydream.consts.Mydreams;
 import com.lin.mydream.manager.DingPhoneRelManager;
 import com.lin.mydream.manager.RememberManager;
 import com.lin.mydream.model.Remember;
@@ -21,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 /**
  * Created on Milky Way Galaxy.
@@ -45,7 +47,7 @@ public class RememberService {
         Long robotId = ReceivedRobotHolder.id(command.ogt());
         List<Remember> remembers = rememberManager.listByRobotId(robotId, RobotEnum.RememberType.remember.code());
         Date now = new Date();
-        StringBuilder sb = new StringBuilder("### 因为记忆，爱才弥足珍贵 —— ");
+        StringBuilder sb = new StringBuilder("### " + Mydreams.getZzs());
         remembers.forEach(x -> {
             long days = CommonUtil.getDistanceOfTwoDate(x.getRememberTime(), now);
             String diffTime = CommonUtil.transferDays(days);
@@ -96,7 +98,7 @@ public class RememberService {
         }
 
         rememberManager.deleteLike(robotId, list.get(list.size() - 1));
-        return Reply.of("delete success");
+        return Reply.of("已为您成功删去这段记忆和日历");
     }
 
     /**
@@ -123,13 +125,14 @@ public class RememberService {
                     .setType(RobotEnum.RememberType.notify.code())
                     .setName(bodies.get(0) + "_" + i)
                     .setReceiver(this.obtainReceiver(command))
-                    .setRememberTime(theTime);
+                    .setRememberTime(theTime)
+                    .setRemTimeStr(DateFormatUtils.format(theTime, Mydreams.Y_M_D));
             notifies.add(remember);
         }
         if (!notifies.isEmpty()) {
             rememberManager.saveBatch(notifies);
         }
-        return Reply.of("create success");
+        return Reply.of(CommonUtil.format("已经为阁下成功创建循环提醒[{}]，每隔{}分钟，共提醒{}次。敬请留意。", bodies.get(0), min, cnt));
 
     }
 
@@ -148,7 +151,7 @@ public class RememberService {
         Date rememberTime = null;
         String theDate = bodies.get(1);
         try {
-            rememberTime = DateUtils.parseDate(theDate, theDate.length() > 10 ? "yyyy-MM-dd HH:mm:ss" : "yyyy-MM-dd");
+            rememberTime = DateUtils.parseDate(theDate, theDate.length() > 10 ? Mydreams.Y_M_D_H_M_S : Mydreams.Y_M_D);
         } catch (ParseException e) {
             throw MydreamException.of("date parse failed. input:{}", theDate);
         }
@@ -157,11 +160,12 @@ public class RememberService {
                 .setRobotId(command.getRobotId())
                 .setType(rememberType.code())
                 .setName(bodies.get(0))
-                .setRememberTime(rememberTime);
+                .setRememberTime(rememberTime)
+                .setRemTimeStr(DateFormatUtils.format(rememberTime, Mydreams.Y_M_D));
         remember.setReceiver(this.obtainReceiver(command));
 
         rememberManager.save(remember);
-        return Reply.of("create success");
+        return Reply.of(RobotEnum.RememberType.remember.equals(rememberType) ? "已成功为您种下一个记忆，期待在未来的土壤中生根发芽。" : "已成功为您设置一个提醒日");
     }
 
 
@@ -184,12 +188,12 @@ public class RememberService {
         return findByDatesRange(begin, end, RobotEnum.RememberType.notify);
     }
 
-    public List<Remember> findRemembersByDatesIn(List<Date> dates) {
+    public List<Remember> findAllRemembersByDatesIn(List<Date> dates) {
         if (CollectionUtils.isEmpty(dates)) {
             return Collections.emptyList();
         }
-        List<String> dateStrList = dates.stream().map(x -> DateFormatUtils.format(x, "yyyy-MM-dd")).collect(Collectors.toList());
-        return findByDatesIn(dateStrList, RobotEnum.RememberType.remember);
+        List<String> dateStrList = dates.stream().map(x -> DateFormatUtils.format(x, Mydreams.Y_M_D)).collect(Collectors.toList());
+        return findByDatesIn(dateStrList);
     }
 
 
@@ -200,6 +204,13 @@ public class RememberService {
                         .in("rem_time_str", dates)
                         .eq("remember_type", rType.code())
                 )
+        );
+    }
+
+    public List<Remember> findByDatesIn(List<String> dates) {
+
+        return CommonUtil.orEmpty(() ->
+                rememberManager.list(Wrappers.<Remember>query().in("rem_time_str", dates))
         );
     }
 

@@ -13,7 +13,6 @@ logging:
   level:
     com.lin.mydream.mapper: debug
 
-
 robot:
   ding:
     - f0676f432ae1da77af9a6219296982c23741ae23ea6f7638bc4bfebfb8d8771a,SECc99725f7915d0314e7c77eed43f51376c47736116ae567374f3fb3f4544a1a6c,e49f5b,true

@@ -2,13 +2,13 @@ package com.lin.mydream.model;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.lin.mydream.consts.Mydreams;
 import com.lin.mydream.model.base.BaseModel;
 import com.lin.mydream.model.enumerate.RobotEnum;
 import com.lin.mydream.util.CommonUtil;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.DateUtils;
 
 import java.util.Date;
 
@@ -67,7 +67,7 @@ public class Remember extends BaseModel {
     public String toSimpleString() {
         return CommonUtil.format("('{}' '{}' '{}' '{}')"
                 , name
-                , DateFormatUtils.format(rememberTime, "yyyy-MM-dd HH:mm:ss")
+                , DateFormatUtils.format(rememberTime, Mydreams.Y_M_D_H_M_S)
                 , RobotEnum.of(type, RobotEnum.RememberType.class)
                 , receiver);
     }

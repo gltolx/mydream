@@ -3,7 +3,9 @@ package com.lin.mydream.component;
 import com.lin.mydream.component.helper.ChatGptHelper;
 import com.lin.mydream.component.helper.TencentChatBotHelper;
 import com.lin.mydream.consts.MydreamException;
+import com.lin.mydream.consts.Mydreams;
 import com.lin.mydream.manager.DingPhoneRelManager;
+import com.lin.mydream.model.Robot;
 import com.lin.mydream.model.Robotx;
 import com.lin.mydream.model.enumerate.RobotEnum;
 import com.lin.mydream.model.enumerate.RobotEnum.CMD;
@@ -11,13 +13,13 @@ import com.lin.mydream.service.RememberService;
 import com.lin.mydream.service.RobotService;
 import com.lin.mydream.service.TestHelpService;
 import com.lin.mydream.service.dto.Command;
-import com.lin.mydream.service.dto.MarkdownDingDTO;
 import com.lin.mydream.service.dto.Reply;
 import com.lin.mydream.service.dto.chatgpt.CReplyDTO;
 import com.lin.mydream.service.dto.tencent.ReplyDTO;
 import com.lin.mydream.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +83,24 @@ public class ReplyRouter implements InitializingBean {
         CMD_ROUTER.put(CMD.ACQUIRE_TOKEN, command -> robotService.getTokenOnPreCreate());
 
         // 创建机器人 ｜ 2.创建 ｜ create robot - [ACCESS_TOKEN],[SIGN],[OUTGOING_TOKEN]
-        CMD_ROUTER.put(CMD.CREATE_ROBOT, command -> robotService.createRobot(command));
+        CMD_ROUTER.put(CMD.CREATE_ROBOT, command -> {
+            Robot r = robotService.createRobot(command);
+
+            // 管理机器人
+            Robotx robotx1 = ReceivedRobotHolder.pick("bb1c18591e");
+            Robotx robotx2 = ReceivedRobotHolder.pick("e49f5b");
+            // 管理员
+            String createTime = DateFormatUtils.format(r.getCreateTime(), Mydreams.Y_M_D_H_M_S);
+            String auditMsg = CommonUtil.format("有一机器人待激活，阁下请核实。\ntoken:{}, 创建时间:{}", r.getOutgoingToken(), createTime);
+            robotx1.sendAt(auditMsg, "17826833386");
+            robotx2.sendAt(auditMsg, "17826833386");
+            return Reply.of(CommonUtil.format("已为您申请创建机器人，请耐心等待管理员的核实。SEQUENCE:{}", r.getId()));
+        });
+        // 激活机器人 ｜ 3.active - [OUTGOING_TOKEN]
+        CMD_ROUTER.put(CMD.ACTIVE_ROBOT, command -> robotService.active(command));
+
+        // 查询待激活机器人 ｜ 3.list active
+        CMD_ROUTER.put(CMD.LIST_ACTIVE_ROBOT, command -> robotService.listActive(command));
 
         // 删除机器人 ｜ delete robot - [ACCESS_TOKEN],[OUTGOING_TOKEN]
         CMD_ROUTER.put(CMD.DELETE_ROBOT, command -> robotService.deleteRobot(command));

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created on Milky Way Galaxy.
@@ -38,7 +39,7 @@ public class RobotManager extends BaseManager<RobotMapper, Robot> {
         this.update(uw()
                 .set("access_token", param.getAccessToken())
                 .set("robot_sign", param.getSign())
-                .set("robot_stat", RobotEnum.Stat.valid.code())
+                .set("robot_stat", RobotEnum.Stat.initial.code())
                 .set("is_admin", false)
                 .set("outgoing_enable", true)
                 .set("update_time", new Date())
@@ -88,6 +89,14 @@ public class RobotManager extends BaseManager<RobotMapper, Robot> {
 //                .one();
     }
 
+    public Robot findByAccessToken(String token) {
+        return this.getOne(qw().eq("access_token", token));
+    }
+
+    public List<Robot> findInvalidRobots() {
+        List<Robot> invalids = CommonUtil.orEmpty(() -> this.list(qw().ne("robot_stat", RobotEnum.Stat.valid.code())));
+        return invalids;
+    }
 
     /**
      * 捞出所有合法的机器人
@@ -99,13 +108,14 @@ public class RobotManager extends BaseManager<RobotMapper, Robot> {
         List<Robot> robots = new ArrayList<>(robotProperties.getDingRobots());
         try {
             // 从db捞的机器人
-            robots.addAll(
-                    CommonUtil.orEmpty(
-                            () -> this.list(qw().eq("robot_stat", RobotEnum.Stat.valid.code()))
-//                            lambdaQuery()
-//                                    .eq(Robot::getStat, RobotEnum.Stat.valid.code())
-//                                    .list()
-                    ));
+            List<Robot> dbRobots = CommonUtil.orEmpty(() -> this.list(qw().eq("robot_stat", RobotEnum.Stat.valid.code())));
+            Set<String> distinctTokens = dbRobots.stream()
+                    .map(Robot::getOutgoingToken).collect(Collectors.toSet());
+            robots.stream()
+                    .filter(f -> !distinctTokens.contains(f.getOutgoingToken()))
+                    .forEach(dbRobots::add);
+            return dbRobots;
+
         } catch (Exception e) {
             log.error("select robots from db error.", e);
         }
@@ -127,4 +137,7 @@ public class RobotManager extends BaseManager<RobotMapper, Robot> {
 //                        .list()
         );
     }
+
+
+
 }

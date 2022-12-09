@@ -23,7 +23,7 @@ public class DingPhoneRelManager extends BaseManager<DingPhoneRelMapper, DingPho
         String phone = command.getBodies().get(0);
         this.register(msgContext.getSenderId(), phone);
         return Reply.of(
-                CommonUtil.format("registered success! my friend～[{}]", msgContext.getSenderNick())
+                CommonUtil.format("已为您成功注册手机号! my friend～[{}]", msgContext.getSenderNick())
         );
     }
 
