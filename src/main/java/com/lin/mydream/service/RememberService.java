@@ -52,7 +52,6 @@ public class RememberService {
             long days = CommonUtil.getDistanceOfTwoDate(x.getRememberTime(), now);
             String diffTime = CommonUtil.transferDays(days);
 
-            // TODO 未来记忆的文案
             sb.append(CommonUtil.format(days > 0 ? "\n- #### 距{}已经{}了" : "\n- #### 距{}还剩{}", x.getName(), diffTime));
         });
 
@@ -193,7 +192,7 @@ public class RememberService {
             return Collections.emptyList();
         }
         List<String> dateStrList = dates.stream().map(x -> DateFormatUtils.format(x, Mydreams.Y_M_D)).collect(Collectors.toList());
-        return findByDatesIn(dateStrList);
+        return findByDatesIn(dateStrList, RobotEnum.RememberType.remember);
     }
 
 

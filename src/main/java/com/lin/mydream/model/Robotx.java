@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -94,9 +95,9 @@ public class Robotx {
 
     public <T extends BaseDingMsgDTO> void sendMd(String title, String mdContent, Boolean atAll) {
         MarkdownDingDTO markdownMsg = MarkdownDingDTO.builder()
-                .title(title)
+                .title(StringUtils.isEmpty(title) ? mdContent.substring(0, 10) : title)
                 .markdownText(mdContent)
-                .atAll(Boolean.FALSE)
+                .atAll(atAll)
                 .build();
         send(markdownMsg);
     }

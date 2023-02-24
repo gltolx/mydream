@@ -159,7 +159,7 @@ public class RobotService {
         String content = "### 等待激活，以下:\n" + invalids.stream()
                 .map(Robot::toSimpleString)
                 .collect(Collectors.joining("\n"));
-        return Reply.of(content);
+        return Reply.of(content, RobotEnum.MsgType.markdown);
     }
 
     /**

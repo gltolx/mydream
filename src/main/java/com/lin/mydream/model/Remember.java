@@ -64,6 +64,12 @@ public class Remember extends BaseModel {
     @TableField("is_notified")
     private boolean notified;
 
+//    /**
+//     * 是否是一次性的（到达时间后就不再回忆中告知）
+//     */
+//    @TableField("is_disposable")
+//    private boolean disposable;
+
     public String toSimpleString() {
         return CommonUtil.format("('{}' '{}' '{}' '{}')"
                 , name

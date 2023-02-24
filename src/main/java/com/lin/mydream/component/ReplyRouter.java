@@ -90,7 +90,7 @@ public class ReplyRouter implements InitializingBean {
             Robotx robotx1 = ReceivedRobotHolder.pick("bb1c18591e");
             Robotx robotx2 = ReceivedRobotHolder.pick("e49f5b");
             // 管理员
-            String createTime = DateFormatUtils.format(r.getCreateTime(), Mydreams.Y_M_D_H_M_S);
+            String createTime = r.getCreateTime() == null ? "NULL" : DateFormatUtils.format(r.getCreateTime(), Mydreams.Y_M_D_H_M_S);
             String auditMsg = CommonUtil.format("有一机器人待激活，阁下请核实。\ntoken:{}, 创建时间:{}", r.getOutgoingToken(), createTime);
             robotx1.sendAt(auditMsg, "17826833386");
             robotx2.sendAt(auditMsg, "17826833386");
@@ -171,6 +171,7 @@ public class ReplyRouter implements InitializingBean {
         try {
             Pair<String, String> pair = CommonUtil.parseCommand(inputContent);
             String input = pair.getLeft(); // 经过一轮校验后的input
+            // FIXME input存储db，异步线程池处理input回复，减少其他网络请求阻塞带来的线程资源不足的问题
             Function<Command, Reply> fun = this.acquire(input);
             if (fun == null) {
                 String reply;

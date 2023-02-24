@@ -23,5 +23,6 @@ tencent:
   secret-key: MRGo55pIUP3RYOxGaeRxCAqFOGrBF1Wl
 
 chat-gpt:
+  api-key-alias: OPENAI_API_KEY_1
   max-tokens: 1000
   temperature: 0.5

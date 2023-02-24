@@ -126,7 +126,9 @@ public class Robot extends BaseModel {
         // 后续创建识别这个outgoingToken追加信息
         entity.setOutgoingToken(token);
         entity.setStat(RobotEnum.Stat.initial.getCode());
-        entity.setUpdateTime(new Date());
+        Date now = new Date();
+        entity.setUpdateTime(now);
+        entity.setCreateTime(now);
 //        entity.setName("0");
         return entity;
     }
@@ -135,7 +137,7 @@ public class Robot extends BaseModel {
 
         return CommonUtil.format("+ SEQUENCE:{}, 创建时间:{}, OUTGOING_TOKEN:**{}**, 状态:{}"
                 , getId()
-                , DateFormatUtils.format(getCreateTime(), Mydreams.Y_M_D_H_M_S)
+                , getCreateTime() == null ? "NULL" : DateFormatUtils.format(getCreateTime(), Mydreams.Y_M_D_H_M_S)
                 , getOutgoingToken()
                 , getStatDesc()
         );

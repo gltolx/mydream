@@ -29,3 +29,15 @@
     mysql> source /root/app/mydream-java/sql/schema_v1.sql
     mysql> source /root/app/mydream-java/sql/insert_v1.sql
 ```
+
+### chatGPT key 
+存放在系统环境变量中, java中通过以下方式获取, 其中"OPENAI_API_KEY_1"通过配置文件获取:
+```java
+    System.getenv("OPENAI_API_KEY_1");
+```
+apiKey别名，在系统环境变量中设置和查看:
+```shell
+> vim .bash_profile
+> export OPENAI_API_KEY_1='sk-************'
+> source .bash_profile 
+```

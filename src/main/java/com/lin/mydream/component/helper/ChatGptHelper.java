@@ -8,6 +8,7 @@ import com.lin.mydream.util.LogUtil;
 import com.lin.mydream.util.OkHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -21,27 +22,41 @@ import java.util.TreeMap;
  */
 @Slf4j
 @Service
-public class ChatGptHelper {
+public class ChatGptHelper implements InitializingBean {
 
     public static final String API_1 = "https://api.openai.com/v1/completions";
 
-    private static String sysApiKey;
+    private String sysApiKey;
 
-    static {
-        try {
-            sysApiKey = System.getenv("OPENAI_API_KEY");
-        } finally {
-            log.info("Load Env Variable [OPENAI_API_KEY], value is:{}", sysApiKey);
-        }
-
-    }
-//    @Value("${chat-gpt.api-key}")
-//    private String apiKey;
-
+    /**
+     * apiKey别名，在系统环境变量中查看
+     * 1、vim .bash_profile
+     * 2、export OPENAI_API_KEY_1='sk-************'
+     * 3、:wq
+     * 4、source .bash_profile
+     */
+    @Value("${chat-gpt.api-key-alias}")
+    private String apiKeyAlias;
+    /**
+     * 最大传输token数（数据量长度大小）
+     */
     @Value("#{T(java.lang.Integer).parseInt('${chat-gpt.max-tokens:1000}')}")
     private Integer maxTokens;
+    /**
+     * 默认值为 1，取值 0-2。该值越大每次返回的结果越随机，即相似度越小。
+     */
     @Value("#{T(java.lang.Double).parseDouble('${chat-gpt.temperature:0.5}')}")
     private Double temperature;
+
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        try {
+            sysApiKey = System.getenv(apiKeyAlias);
+        } finally {
+            log.info("Load Env Variable [{}], value is:{}", apiKeyAlias, sysApiKey);
+        }
+    }
 
     /**
      * davinci模型 ai对话
@@ -55,8 +70,8 @@ public class ChatGptHelper {
         JSONObject requestBody = new JSONObject();
         requestBody.put("model", "text-davinci-003");
         requestBody.put("prompt", input);
-        requestBody.put("max_tokens", 1000);
-        requestBody.put("temperature", 0.5);
+        requestBody.put("max_tokens", maxTokens);
+        requestBody.put("temperature", temperature);
         requestBody.put("top_p", 1);
         requestBody.put("n", 1);
         requestBody.put("stream", false);
@@ -91,8 +106,6 @@ public class ChatGptHelper {
 
         ChatGptHelper chatGptHelper = new ChatGptHelper();
 //        chatGptHelper.apiKey = "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";
-        chatGptHelper.maxTokens = 1000;
-        chatGptHelper.temperature = 0.5D;
         CReplyDTO content = chatGptHelper.davinci("Say this is a test");
         System.out.println(content);
     }
