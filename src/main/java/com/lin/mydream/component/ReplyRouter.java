@@ -18,11 +18,13 @@ import com.lin.mydream.service.dto.chatgpt.CReplyDTO;
 import com.lin.mydream.service.dto.tencent.ReplyDTO;
 import com.lin.mydream.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -54,6 +56,9 @@ public class ReplyRouter implements InitializingBean {
     private TencentChatBotHelper tencentChatBotHelper;
     @Autowired
     private ChatGptHelper chatGptHelper;
+
+    @Value("${chat-gpt.enable-stream-response}")
+    private String enableStreamResponse;
     /**
      * 命令路由, command -> Function{Command, bizReply}
      */
@@ -174,18 +179,23 @@ public class ReplyRouter implements InitializingBean {
             // FIXME input存储db，异步线程池处理input回复，减少其他网络请求阻塞带来的线程资源不足的问题
             Function<Command, Reply> fun = this.acquire(input);
             if (fun == null) {
-                String reply;
-                // 不认识命令则开启 ChatGPT-AI 问答
-                CReplyDTO r = chatGptHelper.davinci(input);
-                if (r.isSuccess()) {
-                    reply = r.getContent();
-                } else {
-                    // ChatGPT-AI 调用失败则开启 Tencent 闲聊模式
-                    ReplyDTO replyDTO = tencentChatBotHelper.chat(input);
-                    reply = replyDTO.getReply();
-                }
-                robotx.send(reply);
+                if (BooleanUtils.toBoolean(enableStreamResponse) && "s".equalsIgnoreCase(input) && StringUtils.isNotEmpty(pair.getRight())) {
+                    // 启用流式响应
+                    chatGptHelper.davinciStream(pair.getRight(), robotx);
 
+                } else {
+                    String reply;
+                    // 不认识命令则开启 ChatGPT-AI 问答
+                    CReplyDTO r = chatGptHelper.davinci(input);
+                    if (r.isSuccess()) {
+                        reply = r.getContent();
+                    } else {
+                        // ChatGPT-AI 调用失败则开启 Tencent 闲聊模式
+                        ReplyDTO replyDTO = tencentChatBotHelper.chat(input);
+                        reply = replyDTO.getReply();
+                    }
+                    robotx.send(reply);
+                }
                 return;
             }
             // 构建command

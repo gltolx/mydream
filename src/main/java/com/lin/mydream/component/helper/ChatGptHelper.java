@@ -2,18 +2,23 @@ package com.lin.mydream.component.helper;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.lin.mydream.model.Robotx;
 import com.lin.mydream.service.dto.chatgpt.CReplyDTO;
 import com.lin.mydream.util.CommonUtil;
 import com.lin.mydream.util.LogUtil;
 import com.lin.mydream.util.OkHttpUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Arrays;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -25,7 +30,19 @@ import java.util.TreeMap;
 public class ChatGptHelper implements InitializingBean {
 
     public static final String API_1 = "https://api.openai.com/v1/completions";
+    private static final Pattern TEXT_PATTERN = Pattern.compile("\"text\": \"(.*?)\"");
+    private static final int GROUP_INDEX = 1;
 
+    private static final String[] PAUSES;
+    static {
+        String[] p = {"。", ";", "；", ":", "：", "?", "？", "!", "！", "\n"};
+
+        PAUSES = ArrayUtils.toStringArray(
+                Arrays.stream(p)
+                        .map(CommonUtil::stringToUnicode)
+                        .toArray()
+        );
+    }
     private String sysApiKey;
 
     /**
@@ -47,6 +64,9 @@ public class ChatGptHelper implements InitializingBean {
      */
     @Value("#{T(java.lang.Double).parseDouble('${chat-gpt.temperature:0.5}')}")
     private Double temperature;
+
+    @Value("#{T(java.lang.Integer).parseInt('${chat-gpt.segment-length:128}')}")
+    private Integer segmentLength;
 
 
     @Override
@@ -101,14 +121,69 @@ public class ChatGptHelper implements InitializingBean {
 
     }
 
-    public static void main(String[] args) {
-        String openai_api_key = System.getenv("OPENAI_API_KEY");
 
-        ChatGptHelper chatGptHelper = new ChatGptHelper();
-//        chatGptHelper.apiKey = "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";
-        CReplyDTO content = chatGptHelper.davinci("Say this is a test");
-        System.out.println(content);
+    public void davinciStream(String input, Robotx robotx) {
+
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("model", "text-davinci-003");
+        requestBody.put("prompt", input);
+        requestBody.put("max_tokens", maxTokens);
+        requestBody.put("temperature", temperature);
+        requestBody.put("top_p", 1);
+        requestBody.put("n", 1);
+        // stream = "true"
+        requestBody.put("stream", true);
+        String body = requestBody.toJSONString();
+        TreeMap<String, String> headers = new TreeMap<>();
+        headers.put("Authorization", "Bearer " + sysApiKey);
+        headers.put("Content-Type", "application/json");
+        try {
+            final StringBuilder[] res = {new StringBuilder()};
+            OkHttpUtil.post(API_1, body, headers
+                    , line -> {
+                        // 解析每个响应的 text 字段并拼接到 StringBuilder 对象中
+                        String text = parseText(line);
+                        if (text == null) {
+                            return;
+                        }
+                        res[0].append(StringUtils.strip(text, "\n"));
+
+                        // 语意暂停时，大于等于n个字符则输出
+                        if (res[0].length() >= segmentLength && isPause(text)) {
+                            String segment = CommonUtil.unicodeToString(res[0].toString());
+                            robotx.send(segment);
+                            res[0] = new StringBuilder();
+                        }
+                    }
+            );
+            if (res[0].length() > 0) {
+                // 输出剩下的结果
+                String last = CommonUtil.unicodeToString(res[0].toString());
+                robotx.send(last);
+            }
+
+        } catch (Exception e) {
+            LogUtil.error("input:{} ", input, e);
+        }
+
     }
 
+    /**
+     * 解析line中的text文本
+     *
+     * @return text文本
+     */
+    private static String parseText(String line) {
+        String text = null;
+        Matcher matcher = TEXT_PATTERN.matcher(line);
+        if (matcher.find()) {
+            text = matcher.group(GROUP_INDEX);
+        }
+        return text;
+    }
+
+    private static boolean isPause(String text) {
+        return StringUtils.isNotBlank(text) && StringUtils.containsAny(text, PAUSES);
+    }
 
 }

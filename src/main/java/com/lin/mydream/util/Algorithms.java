@@ -1,19 +1,27 @@
 package com.lin.mydream.util;
 
 import java.util.LinkedHashSet;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 public class Algorithms {
-
-
     public static void main(String[] args) {
-        String s = "havefunonleetcode";
-        int k = 5;
-        System.out.println(foo(s, k));
 
-//        int[] arr = {1,2,3};
-//        permutation(arr, 0, 2);
+        System.out.println(findKthLargest(new int[]{3, 8, 5, 24, 64, 51, 43, 27, 44}, 1));
     }
+
+    // 利用最大堆求数组的第k大的数据
+    public static Integer findKthLargest(int[] nums, int k) {
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
+        for (int num : nums) {
+            pq.offer(num);
+            if (pq.size() > k) {
+                pq.poll();
+            }
+        }
+        return pq.peek();
+    }
+
 
     /**
      * 给定一个字符串，输出指定k单位长度的所有不存在重复字符的子字符串

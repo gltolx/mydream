@@ -6,15 +6,13 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.helpers.MessageFormatter;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.text.ParseException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -57,7 +55,6 @@ public class CommonUtil {
     }
 
 
-
     public static <T> List<T> orEmpty(Supplier<List<T>> supplier) {
         return Optional.ofNullable(supplier)
                 .map(Supplier::get)
@@ -81,6 +78,7 @@ public class CommonUtil {
                 .map(Supplier::get)
                 .orElse(defaultVal);
     }
+
     /**
      * format占位替换，{} -> param
      */
@@ -91,6 +89,54 @@ public class CommonUtil {
     public static String trimLeading(String str) {
         return org.springframework.util.StringUtils.trimLeadingWhitespace(str);
     }
+
+    public static String unicodeToString2(String unicodeStr) {
+        Properties properties = new Properties();
+        try {
+            properties.load(new StringReader("key=" + unicodeStr));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return properties.getProperty("key");
+    }
+
+    /**
+     * unicode码转为可读字符串
+     */
+    public static String unicodeToString(String unicodeStr) {
+        StringBuilder sb = new StringBuilder();
+        int i = 0;
+        while (i < unicodeStr.length()) {
+            char c = unicodeStr.charAt(i);
+            if (c == '\\' && i + 1 < unicodeStr.length() && unicodeStr.charAt(i + 1) == 'u') {
+                String unicode = unicodeStr.substring(i + 2, i + 6);
+                char ch = (char) Integer.parseInt(unicode, 16);
+                sb.append(ch);
+                i += 6;
+            } else {
+                sb.append(c);
+                i++;
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 字符串转为unicode编码
+     */
+    public static String stringToUnicode(String str) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < str.length(); i++) {
+            int codePoint = str.codePointAt(i);
+            String hex = Integer.toHexString(codePoint);
+            sb.append("\\u").append(hex);
+            if (Character.isSurrogate((char) codePoint)) {
+                i++;
+            }
+        }
+        return sb.toString();
+    }
+
 
     /**
      * 命令规则是 ... - ...
@@ -171,8 +217,7 @@ public class CommonUtil {
     }
 
     public static void main(String[] args) throws ParseException {
-        Pair<String, String> pair = parseCommand("create remember - 'feY测试' '2022-02-14' '17826833386,13639853155'");
-        System.out.println();
+//        Pair<String, String> pair = parseCommand("create remember - 'feY测试' '2022-02-14' '17826833386,13639853155'");
     }
 
 }

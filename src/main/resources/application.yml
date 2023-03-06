@@ -11,7 +11,7 @@ spring:
     url: jdbc:mysql://localhost:3306/mydream?autoReconnect=true&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
 logging:
   level:
-    com.lin.mydream.mapper: debug
+    com.lin.mydream.mapper: warn
 
 robot:
   ding:
@@ -25,3 +25,5 @@ chat-gpt:
   api-key-alias: OPENAI_API_KEY_1
   max-tokens: 1000
   temperature: 0.5
+  enable-stream-response: true
+  segment-length: 128

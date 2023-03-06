@@ -65,7 +65,7 @@ public class RobotSchedule {
     }
 
 
-    @Scheduled(cron = "0 0 22 ? * MON-FRI")
+//    @Scheduled(cron = "0 0 22 ? * MON-FRI")
     public void notifyEnjoyingLife4() {
         this.travelAll(robotx -> robotx.send(TextDingDTO.normal("不允许有人还在卷。")));
     }
