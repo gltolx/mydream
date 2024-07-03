@@ -19,6 +19,18 @@ public class LengthOfLIS_300 {
 //        int[] i = {10, 9,2,5,3,7,101,18};
         int[] i = {2,5,6,3};
         System.out.println(new LengthOfLIS_300().lengthOfLIS(i));
+
+        System.out.println("----------");
+        List<Integer> l = Lists.newArrayList(1,3,4,8,11,20);
+        int searchIndex = Collections.binarySearch(l, 7);
+        int replaceIndex = -searchIndex - 1;
+        System.out.println("replaceIndex: " + replaceIndex);
+
+        TreeSet<Integer> s = new TreeSet<>(l);
+        System.out.println("lower: " + s.lower(7));
+        System.out.println("higher: " + s.higher(7));
+        System.out.println("floor: " + s.floor(7));
+        System.out.println("ceiling: " + s.ceiling(7));
     }
     // 2785634
     //

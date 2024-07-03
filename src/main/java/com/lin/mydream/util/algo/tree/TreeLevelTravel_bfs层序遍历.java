@@ -1,57 +1,22 @@
-package com.lin.mydream.util.algo;
+package com.lin.mydream.util.algo.tree;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.lin.mydream.util.algo.base.Node;
+import com.lin.mydream.util.algo.base.TreeNode;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
+import java.util.Stack;
 
 /**
  * @author xunjiang@hho-inc.com
  * @date 2024/5/22 20:08
  * @desc 二叉树的层序遍历
  */
-public class TreeLevelTravel {
+public class TreeLevelTravel_bfs层序遍历 {
 
 
-
-    public List<Integer> treeLevelTravel(Node root) {
-        PriorityQueue<Node> q = new PriorityQueue<>();
-        q.add(root);
-        List<Integer> ret = new ArrayList<>();
-        while (!q.isEmpty()) {
-            Node current = q.poll();
-            ret.add(current.getValue());
-            q.add(current.getLeft());
-            q.add(current.getRight());
-        }
-        return ret;
-    }
-
-
-
-
-
-    public List<List<Integer>> treeLevelTravel(TreeNode root) {
-        PriorityQueue<TreeNode> q = new PriorityQueue<>();
-        q.add(root);
-        List<List<Integer>> ret = new ArrayList<>();
-        while (!q.isEmpty()) {
-            int levelSize = q.size();
-            List<Integer> levelList = new ArrayList<>();
-            while (levelSize > 0) {
-                TreeNode current = q.poll();
-                levelList.add(current.val);
-                q.add(current.left);
-                q.add(current.right);
-                levelSize--;
-            }
-        }
-        return ret;
-    }
 
     public static void main(String[] args) {
 
@@ -81,9 +46,10 @@ public class TreeLevelTravel {
         root.left = left1;
         root.right = right1;
 
-        List<List<Integer>> ret = new TreeLevelTravel().levelOrder(root);
-
+        List<List<Integer>> ret = new TreeLevelTravel_bfs层序遍历().levelOrder(root);
         System.out.println(JSON.toJSONString(ret, SerializerFeature.PrettyFormat));
+
+        System.out.println(JSON.toJSONString(new TreeLevelTravel_bfs层序遍历().dfs(root)));
     }
 
 
@@ -111,23 +77,24 @@ public class TreeLevelTravel {
     }
 
 
-    public static class TreeNode {
-        int val;
-        TreeNode left;
-        TreeNode right;
+    public List<Integer> dfs(TreeNode root) {
+        List<Integer> ret = new ArrayList<>();
+        Stack<TreeNode> stack = new Stack<>();
+        stack.push(root);
 
-        TreeNode() {
-        }
+        while (!stack.isEmpty()) {
+            TreeNode pop = stack.pop();
+            ret.add(pop.val);
 
-        TreeNode(int val) {
-            this.val = val;
+            if (pop.left != null) {
+                stack.push(pop.left);
+            }
+            if (pop.right != null) {
+                stack.push(pop.right);
+            }
         }
-
-        TreeNode(int val, TreeNode left, TreeNode right) {
-            this.val = val;
-            this.left = left;
-            this.right = right;
-        }
+        return ret;
     }
+
 
 }

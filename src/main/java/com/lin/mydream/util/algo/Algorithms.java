@@ -13,7 +13,7 @@ public class Algorithms {
 
 
     /**
-     * 使用java查找一个数字k是否在二维数组中（这个二维数组是单调递增的，且行首大于上一行末）。
+     * 查找一个数字k是否在二维数组中（这个二维数组是单调递增的，且行首大于上一行末）。
      */
     public static int binarySearch2DMatrix(int[][] matrix, int k) {
         // 行数
@@ -211,10 +211,13 @@ public class Algorithms {
     static class MergeAlternatelySolution {
 
         public static void main(String[] args) {
-            System.out.println(mergeAlternately("abc", "pqr"));
-            System.out.println(mergeAlternately("ab", "pqrs"));
-            // apbqcd
-            System.out.println(mergeAlternately("abcd", "pq"));
+//            System.out.println(mergeAlternately("abc", "pqr"));
+//            System.out.println(mergeAlternately("ab", "pqrs"));
+//            // apbqcd
+//            System.out.println(mergeAlternately("abcd", "pq"));
+
+            int[] arr = {1,2,3,4};
+            permutation(arr, 0, 2);
         }
 
         /**

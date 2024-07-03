@@ -1,6 +1,7 @@
 package com.lin.mydream.util.algo;
 
 import com.alibaba.fastjson.JSON;
+import com.lin.mydream.util.algo.base.ListNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,7 +67,10 @@ public class Test {
 
     }
 
-
+    /**
+     * aabbac
+     * LeetCode：3，最长不重复的子串的长度
+     */
     public static int lengthOfLongestNotRepeatSubString(String s) {
 
         int left = -1, maxLength = 0;
@@ -135,18 +139,32 @@ public class Test {
 
 
     public static void main(String[] args) {
-        int val = 1;
-        int[][] arr = new int[4][4];
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                arr[i][j] = val++;
-            }
-        }
-
-        int[] luoxuan = luoxuan(arr);
-        System.out.println(JSON.toJSONString(luoxuan));
+//        int val = 1;
+//        int[][] arr = new int[4][4];
+//        for (int i = 0; i < 4; i++) {
+//            for (int j = 0; j < 4; j++) {
+//                arr[i][j] = val++;
+//            }
+//        }
+//
+//        int[] luoxuan = luoxuan(arr);
+//        System.out.println(JSON.toJSONString(luoxuan));
 //        System.out.println(lengthOfLongestNotRepeatSubString("aabbac"));
+        ListNode b1 = new ListNode(1);
+        ListNode b2 = new ListNode(2);
+        ListNode b3 = new ListNode(3);
+        ListNode b4 = new ListNode(4);
+        b1.next = b2; b2.next = b3;b3.next=b4;
+        reversePrint(b1);
     }
+
+    public static void reversePrint(ListNode root) {
+        if (root != null) {
+            reversePrint(root.next);
+            System.out.println(root.val);
+        }
+    }
+
 
 
 

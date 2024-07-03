@@ -1,4 +1,4 @@
-package com.lin.mydream.util.algo;
+package com.lin.mydream.util.algo.tree;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +7,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ViewOfTree {
+public class ViewOfTree_二叉树三视图 {
 
     /**
      * 获取该树的左视图，

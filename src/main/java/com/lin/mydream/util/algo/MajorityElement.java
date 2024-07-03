@@ -28,6 +28,8 @@ public class MajorityElement {
      *
      * 输入：[2,2,1,1,1,2,2]
      * 输出：2
+     *
+     * 15345699955
      */
     public int majorityElement(int[] nums) {
 
@@ -44,6 +46,7 @@ public class MajorityElement {
                 mergeCount--;
             }
         }
+        //
         if (mergeCount > 0) {
             final int finalMajority = majority;
             if (Arrays.stream(nums).filter(n -> n == finalMajority).count() > (nums.length / 2)) {
