@@ -1,4 +1,5 @@
-## 代码
+## 开发
+### 代码
 + HTTPS: https://github.com/gltolx/mydream.git
 + SSH: git@github.com:gltolx/mydream.git
 + 添加本地密钥
@@ -9,6 +10,8 @@
   cat ~/.ssh/id_ed25519.pub
   # 3、粘贴到github的SSH keys中，https://github.com/gltolx/mydream/settings/keys/new
 ```
+### 本地mysql
+brew services start mysql
 
 ## 运维部署
 ### 环境
