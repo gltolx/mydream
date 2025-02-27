@@ -36,6 +36,16 @@ brew services start mysql
 ```
 
 ### Mysql
++ CentOS安装：
+```sh
+#    yum install mysql-server -y
+    sudo yum update -y
+    sudo yum install -y mariadb mariadb-server
+    sudo systemctl start mariadb
+    # sudo systemctl stop mariadb
+```
+
+
 + 启动：`service mysqld start`
 + 关闭：`service mysqld stop`
 + 登录：`mysql -u root -p` 密码：[xxxxxx]
