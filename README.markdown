@@ -1,3 +1,15 @@
+## 代码
++ HTTPS: https://github.com/gltolx/mydream.git
++ SSH: git@github.com:gltolx/mydream.git
++ 添加本地密钥
+```sh
+  # 1、用ed25519算法生成本地密钥
+  ssh-keygen -t ed25519 -C "your_github_email@example.com"
+  # 2、复制~/.ssh/id_ed25519.pub的内容到粘贴板
+  cat ~/.ssh/id_ed25519.pub
+  # 3、粘贴到github的SSH keys中，https://github.com/gltolx/mydream/settings/keys/new
+```
+
 ## 运维部署
 ### 环境
 + 阿里云esc：https://ecs.console.aliyun.com/home?spm=5176.12818093.ProductAndResource--ali--widget-product-recent.dre2.3be916d0dUh1gt#/
